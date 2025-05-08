@@ -26,7 +26,7 @@ from imblearn.under_sampling import RandomUnderSampler
 def feature_engineer():
 
     # Load the dataset
-    data = pd.read_csv("adult.csv")
+    data = pd.read_csv("data/adult.csv")
 
     # Display the first few rows of the dataset
     print("First few rows of the dataset:")
