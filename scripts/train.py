@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 import warnings
+import pickle
+import os
 from sklearn.model_selection import train_test_split,cross_val_score,GridSearchCV
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
@@ -280,13 +282,65 @@ def ScoreDataFrame(names,results):
     scoreDataFrame = pd.DataFrame({'Model':names, 'Score': scores})
     return scoreDataFrame
 
+def save_model(model, model_type=None, filename=None):
+    """
+    Save the trained model to a pickle file
+
+    Args:
+        model: The trained model to save
+        model_type: Type of model (e.g., 'LR', 'GBM', 'RF')
+        filename: Custom filename for the saved model (optional)
+
+    Returns:
+        str: Path to the saved model file
+    """
+    # Create models directory if it doesn't exist
+    if not os.path.exists('models'):
+        os.makedirs('models')
+
+    # Generate filename with timestamp if not provided
+    if not filename:
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        model_type = model_type if model_type else "MODEL"
+        filename = f"{model_type}_model_{timestamp}.pkl"
+
+    # Full path to save the model
+    model_path = os.path.join('models', filename)
+
+    # Save the model to a pickle file
+    with open(model_path, 'wb') as f:
+        pickle.dump(model, f)
+    print(f"Model saved to {model_path}")
+
+    return model_path
+
+def load_model(filename, custom_path=None):
+    """
+    Load a model from a pickle file
+
+    Args:
+        filename: The filename of the saved model
+        custom_path: Optional full path to the model file
+
+    Returns:
+        The loaded model
+    """
+    if custom_path:
+        file_path = custom_path
+    else:
+        file_path = os.path.join('models', filename)
+
+    with open(file_path, 'rb') as f:
+        model = pickle.load(f)
+    return model
+
 if __name__ == "__main__":
     # Get the training data
     X_train, y_train, X_test, y_test = Model_Training()
-    
+
     # Get the models
     models = GetBasedModel()
-    
+
     # Run the baseline evaluation
     names, results = BasedLine2(X_train, y_train, models)
     print("\n--------------------------------------------")
@@ -294,4 +348,28 @@ if __name__ == "__main__":
     print("Results:", results)
 
     basedLineScore = ScoreDataFrame(names, results)
-    print(basedLineScore.sort_values(by='Score', ascending=False))
+    scores_df = basedLineScore.sort_values(by='Score', ascending=False)
+    print(scores_df)
+
+    # Train only GBM and RF models
+    model_dict = {}
+    for name, model in models:
+        # Initialize and train models - only GBM and RF
+        if name in ['GBM', 'RF']:
+            print(f"\nTraining {name} model...")
+            model.fit(X_train, y_train)
+            model_dict[name] = model
+
+            # Evaluate on test set
+            y_pred = model.predict(X_test)
+            print(f"\n{name} Model Test Set Evaluation:")
+            print(f"Accuracy: {metrics.accuracy_score(y_test, y_pred):.4f}")
+            print(f"Precision: {metrics.precision_score(y_test, y_pred):.4f}")
+            print(f"Recall: {metrics.recall_score(y_test, y_pred):.4f}")
+            print(f"F1 score: {metrics.f1_score(y_test, y_pred):.4f}")
+            print(f"AUC: {metrics.roc_auc_score(y_test, y_pred):.4f}")
+
+            # Save the trained model
+            save_model(model, name)
+
+    print("\nAll models have been trained and saved successfully.")
