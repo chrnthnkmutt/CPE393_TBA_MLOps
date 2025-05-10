@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 import warnings
+import pickle
+import os
 from sklearn.model_selection import train_test_split,cross_val_score,GridSearchCV
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
@@ -216,13 +218,13 @@ def Model_Training():
     X, y = feature_engineer()
     # Split the dataset into training and testing sets
     X_train1, X_test1, y_train1, y_test1 = train_test_split(X, y, test_size=0.15, random_state=42)
-    
+
     # Fitting the model
     # Fix: Use more stable solver and add regularization to prevent numerical issues
     lr = LogisticRegression(solver='liblinear', C=1.0)
     lr.fit(X_train1, y_train1)
-    
-    # Predict 
+
+    # Predict
     y_pred4 = lr.predict(X_test1)
     print("Accuracy:", metrics.accuracy_score(y_test1, y_pred4))
     print("Precision:", metrics.precision_score(y_test1, y_pred4))
@@ -240,8 +242,8 @@ def Model_Training():
 
     # Split the undersampled data
     X_train, X_test, y_train, y_test = train_test_split(X_rus, y_rus, test_size=0.15, random_state=42)
-    
-    return X_train, y_train, X_test, y_test
+
+    return X_train, y_train, X_test, y_test, lr
 
 def GetBasedModel():
     basedModels = []
@@ -280,13 +282,42 @@ def ScoreDataFrame(names,results):
     scoreDataFrame = pd.DataFrame({'Model':names, 'Score': scores})
     return scoreDataFrame
 
+def save_model(model, model_name=None):
+    """
+    Save the trained model to a pickle file.
+
+    Args:
+        model: The trained model to save
+        model_name: Optional name for the model. If not provided, a default name with timestamp will be used.
+
+    Returns:
+        str: Path to the saved model file
+    """
+    # Create models directory if it doesn't exist
+    os.makedirs('models', exist_ok=True)
+
+    # Generate filename with timestamp if model_name not provided
+    if not model_name:
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        model_name = f"LR_model_{timestamp}.pkl"
+
+    # Full path to save the model
+    model_path = os.path.join('models', model_name)
+
+    # Save the model using pickle
+    with open(model_path, 'wb') as file:
+        pickle.dump(model, file)
+
+    print(f"Model saved successfully to {model_path}")
+    return model_path
+
 if __name__ == "__main__":
     # Get the training data
-    X_train, y_train, X_test, y_test = Model_Training()
-    
+    X_train, y_train, X_test, y_test, lr_model = Model_Training()
+
     # Get the models
     models = GetBasedModel()
-    
+
     # Run the baseline evaluation
     names, results = BasedLine2(X_train, y_train, models)
     print("\n--------------------------------------------")
@@ -295,3 +326,7 @@ if __name__ == "__main__":
 
     basedLineScore = ScoreDataFrame(names, results)
     print(basedLineScore.sort_values(by='Score', ascending=False))
+
+    # Save the Logistic Regression model
+    saved_model_path = save_model(lr_model)
+    print(f"Model saved to: {saved_model_path}")
