@@ -23,6 +23,11 @@ from sklearn.base import TransformerMixin
 from sklearn.preprocessing import MinMaxScaler,StandardScaler
 from imblearn.under_sampling import RandomUnderSampler
 
+# Suppress specific warnings
+warnings.filterwarnings("ignore", category=RuntimeWarning, message="divide by zero encountered in matmul")
+warnings.filterwarnings("ignore", category=RuntimeWarning, message="overflow encountered in matmul")
+warnings.filterwarnings("ignore", category=RuntimeWarning, message="invalid value encountered in matmul")
+
 def feature_engineer():
 
     # Load the dataset
@@ -58,9 +63,10 @@ def feature_engineer():
         print(f"{column} = {data[data[column] == '?'].shape[0]}")
 
     # We replace the question marks (?) with mode value of each column that has question marks (?) values.
-    data["workclass"][data["workclass"] == "?"] = data["workclass"].mode()[0]
-    data["occupation"][data["occupation"] == "?"] = data["occupation"].mode()[0]
-    data["native.country"][data["native.country"] == "?"] = data["native.country"].mode()[0]
+    # Fix: Use loc instead of chained assignment
+    data.loc[data["workclass"] == "?", "workclass"] = data["workclass"].mode()[0]
+    data.loc[data["occupation"] == "?", "occupation"] = data["occupation"].mode()[0]
+    data.loc[data["native.country"] == "?", "native.country"] = data["native.country"].mode()[0]
 
     # Check for any remaining question marks (?) data
     print("\n--------------------------------------------")
@@ -90,50 +96,45 @@ def feature_engineer():
         print(f"{column} = {data[data[column] == '?'].shape[0]}")
     
     # Education
-
     #     9th, 10th, 11th, 12th comes under HighSchool Grad but it has mentioned separately
     #     Create Elementary object for 1st-4th, 5th-6th, 7th-8th
-
     hs_grad = ['HS-grad','11th','10th','9th','12th']
     elementary = ['1st-4th','5th-6th','7th-8th']
 
-    # replace elements in list.
-    data['education'].replace(to_replace = hs_grad,value = 'HS-grad',inplace = True)
-    data['education'].replace(to_replace = elementary,value = 'elementary_school',inplace = True)
+    # Fix: Copy data to avoid warning and use more modern replacement approach
+    data = data.copy()
+    data['education'] = data['education'].replace(hs_grad, 'HS-grad')
+    data['education'] = data['education'].replace(elementary, 'elementary_school')
     print("\n--------------------------------------------")
     print(data['education'].value_counts())
 
     # Marital Status
-    
     #     Married-civ-spouse,Married-spouse-absent,Married-AF-spouse comes under category Married
     #     Divorced, separated again comes under category separated.
-
     married= ['Married-spouse-absent','Married-civ-spouse','Married-AF-spouse']
     separated = ['Separated','Divorced']
 
-    #replace elements in list.
-    data['marital.status'].replace(to_replace = married ,value = 'Married',inplace = True)
-    data['marital.status'].replace(to_replace = separated,value = 'Separated',inplace = True)
+    # Fix: Use direct replacement without inplace
+    data['marital.status'] = data['marital.status'].replace(married, 'Married')
+    data['marital.status'] = data['marital.status'].replace(separated, 'Separated')
     print("\n--------------------------------------------")
     print(data['marital.status'].value_counts())
 
     # Workclass
-
     #     Self-emp-not-inc, Self-emp-inc comes under category self employed
     #     Local-gov,State-gov,Federal-gov comes under category goverment emloyees
-
     self_employed = ['Self-emp-not-inc','Self-emp-inc']
     govt_employees = ['Local-gov','State-gov','Federal-gov']
 
-    #replace elements in list.
-    data['workclass'].replace(to_replace = self_employed ,value = 'Self_employed',inplace = True)
-    data['workclass'].replace(to_replace = govt_employees,value = 'Govt_employees',inplace = True)
+    # Fix: Use direct replacement without inplace
+    data['workclass'] = data['workclass'].replace(self_employed, 'Self_employed')
+    data['workclass'] = data['workclass'].replace(govt_employees, 'Govt_employees')
     print("\n--------------------------------------------")
     print(data['workclass'].value_counts())
 
     # Delete the unuseful column
     del_cols = ['education.num']
-    data.drop(labels = del_cols,axis = 1,inplace = True)
+    data = data.drop(columns=del_cols)  # Fix: Use drop with columns parameter
 
     # Separate data types
     # Numeric columns
@@ -155,7 +156,6 @@ def feature_engineer():
         def transform(self,X):
             return X[self.attribute_names]
     
-    
     class num_trans(TransformerMixin):
         def __init__(self):
             pass
@@ -168,8 +168,6 @@ def feature_engineer():
             df.columns = num_col_new 
             return df
             
-        
-        
     pipeline = Pipeline([('selector',DataFrameSelector(num_col_new)),  
                         ('scaler',MinMaxScaler()),
                         ('transform',num_trans())])
@@ -210,20 +208,18 @@ def feature_engineer():
 
     # split the dataset
     y = final_df['income_<=50K']
-    final_df.drop(labels = ['id','income_<=50K','fnlwgt'],axis = 1,inplace = True)
-    X = final_df
+    X = final_df.drop(columns=['id','income_<=50K','fnlwgt'])  # Fix: Use drop with columns parameter
 
     return X, y
     
-feature_engineer()   
-
 def Model_Training():
     X, y = feature_engineer()
     # Split the dataset into training and testing sets
     X_train1, X_test1, y_train1, y_test1 = train_test_split(X, y, test_size=0.15, random_state=42)
     
     # Fitting the model
-    lr = LogisticRegression()
+    # Fix: Use more stable solver and add regularization to prevent numerical issues
+    lr = LogisticRegression(solver='liblinear', C=1.0)
     lr.fit(X_train1, y_train1)
     
     # Predict 
@@ -249,8 +245,10 @@ def Model_Training():
 
 def GetBasedModel():
     basedModels = []
-    basedModels.append(('LR', LogisticRegression()))
+    # Fix: Use more stable solver and add regularization to prevent numerical issues
+    basedModels.append(('LR', LogisticRegression(solver='liblinear', C=1.0)))
     basedModels.append(('GBM', GradientBoostingClassifier()))
+    basedModels.append(('RF', RandomForestClassifier(n_estimators=100, random_state=42))) # Fix: Add random_forest 
     return basedModels
 
 def BasedLine2(X_train, y_train, models):
