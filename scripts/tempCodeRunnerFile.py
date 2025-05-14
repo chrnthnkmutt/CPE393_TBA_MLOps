@@ -1,0 +1,1 @@
+del_Training >> GetBaseModel >> BasedLine2 >> ScoreDataFrame >> save_model >> load_model >> end

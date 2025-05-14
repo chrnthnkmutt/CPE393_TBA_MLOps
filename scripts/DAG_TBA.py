@@ -7,9 +7,10 @@ import joblib
 import sys
 import os
 
-from train import (feature_engineering, Model_Training, GetBaseModel, BasedLine2, ScoreDataFrame, save_model, load_model)
+sys.path.append('/home/santitham/airflow/dags/CPE393_TBAOps')
+# sys.path.append(os.path.dirname(os.path.abspath(__file__))) 
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+from train import feature_engineering, Model_Training, GetBaseModel, BasedLine2, ScoreDataFrame, save_model, load_model
 
 default_args = {
     'owner': 'airflow',
@@ -44,22 +45,40 @@ with DAG(
 
     BasedLine2 = PythonOperator(
         task_id = 'BasedLine2',
-        python_callable = BasedLine2
+        python_callable = BasedLine2,
+        op_kwargs = {
+            'X_train': "{{task_instance.xcom_pull(task_ids = 'Model_Training', key = 'X_train')}}",
+            'y_train': "{{task_instance.xcom_pull(task_ids = 'Model_Training', key = 'y_train')}}",
+            'models': "{{task_instance.xcom_pull(task_ids = 'GetBaseModel', key = 'models')}}"
+        }
     )
 
     ScoreDataFrame = PythonOperator(
         task_id = 'ScoreDataFrame',
-        python_callable = ScoreDataFrame
+        python_callable = ScoreDataFrame,
+        op_kwargs = {
+            'names': "{{task_instance.xcom_pull(task_ids = 'BasedLine2', key = 'names')}}",
+            'results': "{{task_instance.xcom_pull(task_ids = 'BasedLine2', key = 'results')}}"
+        }
     )
 
     save_model = PythonOperator(
         task_id = 'save_model',
-        python_callable = save_model
+        python_callable = save_model,
+        op_kwargs = {
+            'model': "{{task_instance.xcom_pull(task_ids = 'Model_Training', key = 'models')}}",
+            'model_type': "{{ ti.xcom_pull(task_ids = 'Model_Training', key='model_type') }}",
+            'filename': "{{task_instance.xcom_pull(task_ids = 'Model_Training', key = 'filename')}}"
+        }
     )
 
     load_model = PythonOperator(
         task_id  = 'load_model',
-        python_callable = load_model
+        python_callable = load_model,
+        op_kwargs = {
+            'filename': "{{task_instance.xcom_pull(task_ids = 'save_model', key = 'filename')}}",
+            'custom_path': "{{task_instance.xcom_pull(task_ids = 'save_model', key = 'custom_path')}}"
+        }
     )
 
     end = EmptyOperator(task_id = 'end')
