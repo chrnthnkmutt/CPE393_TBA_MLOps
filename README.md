@@ -27,6 +27,26 @@ The repository is structured as follows:
 
 ## Usage
 
+(
+
+    not available yet, but you can use conda to create the environment and activate it.
+
+    ```
+    conda env create -f environment.yml
+    conda activate mlops-project
+    ```
+
+    Docker usage : 
+
+    docker build -t ml-project .
+
+    docker run -p 8888:8888 -v $(pwd):/app ml-project
+
+    and you can access the jupyter notebook at http://localhost:8888/
+
+)
+
+
 ### Setting Up the Environment
 
 1. Clone the repository:
