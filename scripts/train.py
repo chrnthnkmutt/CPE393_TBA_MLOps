@@ -23,7 +23,6 @@ from sklearn.model_selection import StratifiedKFold
 from sklearn.pipeline import Pipeline
 from sklearn.base import TransformerMixin
 from sklearn.preprocessing import MinMaxScaler,StandardScaler
-from imblearn.under_sampling import RandomUnderSampler
 
 # Suppress specific warnings
 warnings.filterwarnings("ignore", category=RuntimeWarning, message="divide by zero encountered in matmul")
@@ -232,16 +231,8 @@ def Model_Training():
     print("F1 score:", metrics.f1_score(y_test1, y_pred4))
     print("AUC :", metrics.roc_auc_score(y_test1, y_pred4))
 
-    # Apply Random Under Sampling
-    rus = RandomUnderSampler(random_state=42)
-    X_rus, y_rus = rus.fit_resample(X, y)
-
-    # Convert to DataFrame and use the original column names
-    X_rus = pd.DataFrame(X_rus, columns=X.columns)
-    y_rus = pd.Series(y_rus, name="income")  # Changed to Series instead of DataFrame
-
-    # Split the undersampled data
-    X_train, X_test, y_train, y_test = train_test_split(X_rus, y_rus, test_size=0.15, random_state=42)
+    # Split the data directly without undersampling
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.15, random_state=42)
     
     return X_train, y_train, X_test, y_test
 
