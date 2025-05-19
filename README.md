@@ -86,7 +86,7 @@ This repository is structured to follow best practices for Machine Learning Oper
 ## Checklist
 ✅   Training Data Management
 
-_   Containerize with Docker
+_   Containerize with Docker (Romain)
 
 ✅   Data Cleansing and Feature Engineering
 
@@ -94,8 +94,8 @@ _   Containerize with Docker
 
 ✅   Hyperparameter Tuning
 
-_   Model Development and Experiment Tracking
+_   Model Development and Experiment Tracking (MLFlow - Tee) - Wednesday Night
 
-_   Model Deployment
+_   Model Deployment and Flask (Romain)
 
-_   Model Mornitoring
+_   Model Mornitoring (Japan, Boat, Tee) - Tomorrow
