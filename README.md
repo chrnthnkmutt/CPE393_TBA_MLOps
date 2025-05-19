@@ -82,3 +82,20 @@ jupyter notebook notebooks/02_compare-all-the-classification-models.ipynb
 ## Additional Information
 
 This repository is structured to follow best practices for Machine Learning Operations (MLOps). The directory structure separates different functionalities such as data processing, model training, and evaluation. This helps in maintaining a clean and organized codebase, making it easier to manage and scale machine learning projects.
+
+## Checkleist
+/   Training Data Management
+
+_   Containerize with Docker
+
+/   Data Cleansing and Feature Engineering
+
+/   Building Data Pipeline
+
+/   Hyperparameter Tuning
+
+_   Model Development and Experiment Tracking
+
+_   Model Deployment
+
+_   Model Mornitoring
