@@ -98,4 +98,4 @@ _   Model Development and Experiment Tracking (MLFlow - Tee) - Wednesday Night
 
 _   Model Deployment and Flask (Romain)
 
-_   Model Mornitoring (Japan, Boat, Tee) - Tomorrow
+✅   Model Mornitoring (Japan, Boat, Tee) - Tomorrow
