@@ -1,3 +1,5 @@
+import mlflow
+import mlflow.sklearn
 import numpy as np
 import pandas as pd
 import warnings
@@ -23,6 +25,10 @@ from sklearn.model_selection import StratifiedKFold
 from sklearn.pipeline import Pipeline
 from sklearn.base import TransformerMixin
 from sklearn.preprocessing import MinMaxScaler,StandardScaler
+
+
+mlflow.set_tracking_uri("http://localhost:5000")
+mlflow.set_experiment("MyExperiment")
 
 # Suppress specific warnings
 warnings.filterwarnings("ignore", category=RuntimeWarning, message="divide by zero encountered in matmul")
@@ -345,22 +351,48 @@ if __name__ == "__main__":
     # Train only GBM and RF models
     model_dict = {}
     for name, model in models:
-        # Initialize and train models - only GBM and RF
         if name in ['GBM', 'RF']:
-            print(f"\nTraining {name} model...")
-            model.fit(X_train, y_train)
-            model_dict[name] = model
+            with mlflow.start_run(run_name=name):
+                print(f"\nTraining {name} model...")
+                model.fit(X_train, y_train)
 
-            # Evaluate on test set
-            y_pred = model.predict(X_test)
-            print(f"\n{name} Model Test Set Evaluation:")
-            print(f"Accuracy: {metrics.accuracy_score(y_test, y_pred):.4f}")
-            print(f"Precision: {metrics.precision_score(y_test, y_pred):.4f}")
-            print(f"Recall: {metrics.recall_score(y_test, y_pred):.4f}")
-            print(f"F1 score: {metrics.f1_score(y_test, y_pred):.4f}")
-            print(f"AUC: {metrics.roc_auc_score(y_test, y_pred):.4f}")
+                # Predict and evaluate
+                y_pred = model.predict(X_test)
+                acc = metrics.accuracy_score(y_test, y_pred)
+                prec = metrics.precision_score(y_test, y_pred)
+                rec = metrics.recall_score(y_test, y_pred)
+                f1 = metrics.f1_score(y_test, y_pred)
+                auc = metrics.roc_auc_score(y_test, y_pred)
 
-            # Save the trained model
-            save_model(model, name)
+                print(f"\n{name} Model Test Set Evaluation:")
+                print(f"Accuracy: {acc:.4f}")
+                print(f"Precision: {prec:.4f}")
+                print(f"Recall: {rec:.4f}")
+                print(f"F1 score: {f1:.4f}")
+                print(f"AUC: {auc:.4f}")
+
+                # Log metrics
+                mlflow.log_metric("accuracy", acc)
+                mlflow.log_metric("precision", prec)
+                mlflow.log_metric("recall", rec)
+                mlflow.log_metric("f1_score", f1)
+                mlflow.log_metric("auc", auc)
+
+                # Log model
+                mlflow.sklearn.log_model(model, name.lower() + "_model")
+
+                # Optionally log params
+                if name == "GBM":
+                    mlflow.log_param("n_estimators", model.n_estimators)
+                    mlflow.log_param("learning_rate", model.learning_rate)
+                elif name == "RF":
+                    mlflow.log_param("n_estimators", model.n_estimators)
+                    mlflow.log_param("max_depth", model.max_depth)
+
+                # Save model with your existing function
+                save_model(model, name)
+
+                print(f"{name} model training and logging completed.\n")
+
 
     print("\nAll models have been trained and saved successfully.")
