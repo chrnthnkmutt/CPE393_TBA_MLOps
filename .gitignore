@@ -1,4 +1,5 @@
 *.pkl
+!RF_model_prod.pkl
 .ipynb_checkpoints/
 
 # Byte-compiled / optimized / DLL files
