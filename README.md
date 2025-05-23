@@ -94,7 +94,7 @@ _   Containerize with Docker (Romain)
 
 ✅   Hyperparameter Tuning
 
-_   Model Development and Experiment Tracking (MLFlow - Tee) - Wednesday Night
+✅   Model Development and Experiment Tracking (MLFlow - Tee) - Wednesday Night
 
 _   Model Deployment and Flask (Romain)
 
