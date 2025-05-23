@@ -11,25 +11,49 @@ interface HeroProps {
 
 export function Hero({ modelInfo }: HeroProps) {
   return (
-    <section className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 py-12">
+    <section 
+      className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 py-12"
+      role="banner"
+      aria-label="Hero section"
+    >
       <div className="container mx-auto px-4">
         <div className="text-center max-w-4xl mx-auto">
-          <h2 className="text-4xl font-bold mb-4">Income Prediction with Machine Learning</h2>
-          <p className="text-xl text-muted-foreground mb-6">
+          <h2 
+            className="text-4xl font-bold mb-4"
+            id="hero-title"
+          >
+            Income Prediction with Machine Learning
+          </h2>
+          <p 
+            className="text-xl text-muted-foreground mb-6"
+            aria-labelledby="hero-title"
+          >
             Use our artificial intelligence model to predict whether a person earns more or less than $50,000
             per year based on their demographic and professional characteristics.
           </p>
 
           {modelInfo && (
-            <div className="flex justify-center items-center gap-4 flex-wrap">
-              <Badge variant="outline" className="px-4 py-2 text-sm">
-                <Info className="w-4 h-4 mr-2" />
+            <div 
+              className="flex justify-center items-center gap-4 flex-wrap"
+              role="list"
+              aria-label="Model information"
+            >
+              <Badge 
+                variant="outline" 
+                className="px-4 py-2 text-sm"
+                role="listitem"
+              >
+                <Info className="w-4 h-4 mr-2" aria-hidden="true" />
                 Model: {modelInfo.model_type}
               </Badge>
 
               {modelInfo.accuracy_score && (
-                <Badge variant="outline" className="px-4 py-2 text-sm">
-                  <Award className="w-4 h-4 mr-2" />
+                <Badge 
+                  variant="outline" 
+                  className="px-4 py-2 text-sm"
+                  role="listitem"
+                >
+                  <Award className="w-4 h-4 mr-2" aria-hidden="true" />
                   Accuracy: {(modelInfo.accuracy_score * 100).toFixed(2)}%
                 </Badge>
               )}
