@@ -26,8 +26,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.base import TransformerMixin
 from sklearn.preprocessing import MinMaxScaler,StandardScaler
 
-
-mlflow.set_tracking_uri("http://localhost:5000")
+mlflow.set_tracking_uri("sqlite:///mlflow.db")
 mlflow.set_experiment("MyExperiment")
 
 # Suppress specific warnings
