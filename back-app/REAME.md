@@ -14,7 +14,7 @@ Issue with the model:
 
 ### 1. API Health Check
 ```bash
-GET /health
+GET /api/health
 ```
 Response:
 ```json
@@ -25,13 +25,13 @@ Response:
 
 ### 2. Features List
 ```bash
-GET /features
+GET /api/features
 ```
 Returns the list of available features for prediction.
 
 ### 3. Simple Prediction
 ```bash
-POST /predict
+POST /api/predict
 ```
 Returns a binary prediction (>50K or <=50K)
 
@@ -56,13 +56,13 @@ You can also use the `apiExemple.json` file as an example input data.
 
 ### 4. Prediction Probabilities
 ```bash
-POST /predict_proba
+POST /api/predict_proba
 ```
 Returns probabilities for each class.
 
 ### 5. Model Information
 ```bash
-GET /model_info
+GET /api/model_info
 ```
 Returns information about the used model:
 - Model type
@@ -73,7 +73,7 @@ Returns information about the used model:
 
 ### 6. Feature Explanation
 ```bash
-POST /explain
+POST /api/explain
 ```
 Returns the importance of each feature in the model.
 
@@ -82,7 +82,7 @@ Returns the importance of each feature in the model.
 To test the API, you can use the `apiExemple.json` file as an example input data. Here's a curl request example:
 
 ```bash
-curl -X POST http://localhost:5000/predict \
+curl -X POST http://localhost:5000/api/predict \
      -H "Content-Type: application/json" \
      -d @apiExemple.json
 ```

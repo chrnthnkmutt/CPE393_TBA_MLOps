@@ -18,6 +18,7 @@ dependencies:
   - xgboost
   - pip
   - flask
+  - flask-cors
   - pip:
       - keras
       - tensorflow
