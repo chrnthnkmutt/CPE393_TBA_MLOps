@@ -25,8 +25,14 @@ from sklearn.model_selection import StratifiedKFold
 from sklearn.pipeline import Pipeline
 from sklearn.base import TransformerMixin
 from sklearn.preprocessing import MinMaxScaler,StandardScaler
+from dotenv import load_dotenv
 
-mlflow.set_tracking_uri("sqlite:///mlflow.db")
+load_dotenv(os.path.join(os.path.dirname(__file__), "../.env"))
+
+print(os.getenv("MLFLOW_TRACKING_URI"))
+mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI") or "sqlite:///mlflow.db")
+
+
 mlflow.set_experiment("MyExperiment")
 
 # Suppress specific warnings
@@ -387,6 +393,21 @@ if __name__ == "__main__":
                 elif name == "RF":
                     mlflow.log_param("n_estimators", model.n_estimators)
                     mlflow.log_param("max_depth", model.max_depth)
+                    
+                    # not the best way to save metrics, but mlflow & website are not hosted on the same server (more simple for a class presentation)
+                    metrics_dict = {
+                        'accuracy': acc,
+                        'precision': prec,
+                        'recall': rec,
+                        'f1_score': f1,
+                        'auc': auc,
+                    }
+
+                    with open(f'models/{name}_metrics.json', 'w') as f:
+                        import json
+                        json.dump(metrics_dict, f, indent=2)
+
+                    print(f"{name} metrics saved to models/{name}_metrics.json")
 
                 # Save model with your existing function
                 save_model(model, name)

@@ -15,7 +15,7 @@ with open('RF_model_prod.pkl', 'rb') as f:
 with open("features.json") as f:
     feature_info = json.load(f)
     feature_names = [f["name"] for f in feature_info]
-
+    
 
 # curl http://localhost:5000/api/health
 @app.route("/api/health", methods=["GET"])
@@ -63,16 +63,12 @@ def explain():
     sorted_importances = dict(sorted(importances.items(), key=lambda x: x[1], reverse=True))
     return jsonify(sorted_importances)
 
-# # curl http://localhost:5000/api/metrics
-# @app.route("/api/metrics", methods=["GET"])
-# def metrics():
-#     return jsonify({
-#         "accuracy": model.score(X_test, y_test),
-#         "f1_score": f1_score(y_test, y_pred),
-#         "precision": precision_score(y_test, y_pred),
-#         "recall": recall_score(y_test, y_pred),
-#         "roc_auc": roc_auc_score(y_test, y_pred)
-#     })
+# curl http://localhost:5000/api/metrics
+@app.route("/api/metrics", methods=["GET"])
+def metrics():
+    with open('RF_metrics.json', 'r') as f:
+        metrics = json.load(f)
+    return jsonify(metrics)
 
 
 if __name__ == "__main__":
