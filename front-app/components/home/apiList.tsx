@@ -4,7 +4,7 @@ import { Server } from "lucide-react";
 
 export default function ApiList() {
     return ( 
-        <Card >
+        <Card className="m-4 md:m-0">
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Server className="w-5 h-5" />

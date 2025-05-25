@@ -37,6 +37,61 @@ def predict():
     label = ">50K" if prediction else "<=50K"
     return jsonify({"prediction": label})
 
+
+# "age": z.number().min(17).max(90),
+#     "capital.gain": z.number().min(0).max(99999),
+#     "capital.loss": z.number().min(0).max(4356),
+#     "hours.per.week": z.number().min(1).max(99),
+#     // "hours-per-week": z.number().min(1).max(99),
+    
+  
+#     "education_Assoc-acdm": z.boolean(),
+#     "education_Assoc-voc": z.boolean(),
+#     "education_Bachelors": z.boolean(),
+#     "education_Doctorate": z.boolean(),
+#     "education_HS-grad": z.boolean(),
+#     "education_Masters": z.boolean(),
+#     "education_Prof-school": z.boolean(),
+  
+#     "marital.status_Married": z.boolean(),
+#     "marital.status_Never-married": z.boolean(),
+#     "marital.status_Separated": z.boolean(),
+#     "marital.status_Widowed": z.boolean(),
+  
+#     "occupation_Adm-clerical": z.boolean(),
+#     "occupation_Armed-Forces": z.boolean(),
+#     "occupation_Craft-repair": z.boolean(),
+#     "occupation_Exec-managerial": z.boolean(),
+#     "occupation_Farming-fishing": z.boolean(),
+#     "occupation_Handlers-cleaners": z.boolean(),
+#     "occupation_Machine-op-inspct": z.boolean(),
+#     "occupation_Priv-house-serv": z.boolean(),
+#     "occupation_Prof-specialty": z.boolean(),
+#     "occupation_Protective-serv": z.boolean(),
+#     "occupation_Sales": z.boolean(),
+#     "occupation_Tech-support": z.boolean(),
+#     "occupation_Transport-moving": z.boolean(),
+  
+#     "race_Amer-Indian-Eskimo": z.boolean(),
+#     "race_Asian-Pac-Islander": z.boolean(),
+#     "race_Other": z.boolean(),
+#     "race_White": z.boolean(),
+  
+#     "relationship_Husband": z.boolean(),
+#     "relationship_Not-in-family": z.boolean(),
+#     "relationship_Other-relative": z.boolean(),
+#     "relationship_Own-child": z.boolean(),
+#     "relationship_Unmarried": z.boolean(),
+#     "relationship_Wife": z.boolean(),
+  
+#     "sex_Female": z.boolean(),
+  
+#     "workclass_Govt_employees": z.boolean(),
+#     "workclass_Never-worked": z.boolean(),
+#     "workclass_Private": z.boolean(),
+#     "workclass_Self_employed": z.boolean(),
+#     "workclass_Without-pay": z.boolean()
+
 @app.route("/api/predict_proba", methods=["POST"])
 def predict_proba():
     data = request.get_json()

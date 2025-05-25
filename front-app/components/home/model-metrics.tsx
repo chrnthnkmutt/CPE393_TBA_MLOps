@@ -19,7 +19,7 @@ export function ModelMetrics({ metrics, isLoading, error }: ModelMetricsProps) {
 
     if (error) {
         return (
-            <Card>
+            <Card className="m-4 md:m-0">
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-red-500">
                         <AlertCircle className="w-5 h-5" />
@@ -33,7 +33,7 @@ export function ModelMetrics({ metrics, isLoading, error }: ModelMetricsProps) {
 
     if (isLoading || !metrics) {
         return (
-            <Card>
+            <Card className="m-4 md:m-0">
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <Info className="w-5 h-5" />
@@ -73,7 +73,7 @@ export function ModelMetrics({ metrics, isLoading, error }: ModelMetricsProps) {
     }
 
     return (
-        <Card>
+        <Card className="m-4 md:m-0">
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                     <Info className="w-5 h-5" />

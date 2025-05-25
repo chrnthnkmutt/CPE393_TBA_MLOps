@@ -29,7 +29,7 @@ export function ModelInfo({ info, isLoading, error }: ModelInfoProps) {
   
     if (error) {
         return (
-            <Card>
+            <Card className="m-4 md:m-0">
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-red-500">
                         <AlertCircle className="w-5 h-5" />
@@ -43,7 +43,7 @@ export function ModelInfo({ info, isLoading, error }: ModelInfoProps) {
   
     if (isLoading || !info) {
       return (
-        <Card>
+        <Card className="m-4 md:m-0">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Info className="w-5 h-5" />
@@ -83,7 +83,7 @@ export function ModelInfo({ info, isLoading, error }: ModelInfoProps) {
     }
   
     return (
-      <Card>
+      <Card className="m-4 md:m-0">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Info className="w-5 h-5" />
