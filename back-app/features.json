@@ -1,0 +1,178 @@
+[
+  {
+    "name": "education_Assoc-acdm",
+    "type": "binary"
+  },
+  {
+    "name": "education_Assoc-voc",
+    "type": "binary"
+  },
+  {
+    "name": "education_Bachelors",
+    "type": "binary"
+  },
+  {
+    "name": "education_Doctorate",
+    "type": "binary"
+  },
+  {
+    "name": "education_HS-grad",
+    "type": "binary"
+  },
+  {
+    "name": "education_Masters",
+    "type": "binary"
+  },
+  {
+    "name": "education_Prof-school",
+    "type": "binary"
+  },
+  {
+    "name": "marital.status_Married",
+    "type": "binary"
+  },
+  {
+    "name": "marital.status_Never-married",
+    "type": "binary"
+  },
+  {
+    "name": "marital.status_Separated",
+    "type": "binary"
+  },
+  {
+    "name": "marital.status_Widowed",
+    "type": "binary"
+  },
+  {
+    "name": "occupation_Adm-clerical",
+    "type": "binary"
+  },
+  {
+    "name": "occupation_Armed-Forces",
+    "type": "binary"
+  },
+  {
+    "name": "occupation_Craft-repair",
+    "type": "binary"
+  },
+  {
+    "name": "occupation_Exec-managerial",
+    "type": "binary"
+  },
+  {
+    "name": "occupation_Farming-fishing",
+    "type": "binary"
+  },
+  {
+    "name": "occupation_Handlers-cleaners",
+    "type": "binary"
+  },
+  {
+    "name": "occupation_Machine-op-inspct",
+    "type": "binary"
+  },
+  {
+    "name": "occupation_Priv-house-serv",
+    "type": "binary"
+  },
+  {
+    "name": "occupation_Prof-specialty",
+    "type": "binary"
+  },
+  {
+    "name": "occupation_Protective-serv",
+    "type": "binary"
+  },
+  {
+    "name": "occupation_Sales",
+    "type": "binary"
+  },
+  {
+    "name": "occupation_Tech-support",
+    "type": "binary"
+  },
+  {
+    "name": "occupation_Transport-moving",
+    "type": "binary"
+  },
+  {
+    "name": "race_Amer-Indian-Eskimo",
+    "type": "binary"
+  },
+  {
+    "name": "race_Asian-Pac-Islander",
+    "type": "binary"
+  },
+  {
+    "name": "race_Other",
+    "type": "binary"
+  },
+  {
+    "name": "race_White",
+    "type": "binary"
+  },
+  {
+    "name": "relationship_Husband",
+    "type": "binary"
+  },
+  {
+    "name": "relationship_Not-in-family",
+    "type": "binary"
+  },
+  {
+    "name": "relationship_Other-relative",
+    "type": "binary"
+  },
+  {
+    "name": "relationship_Own-child",
+    "type": "binary"
+  },
+  {
+    "name": "relationship_Unmarried",
+    "type": "binary"
+  },
+  {
+    "name": "relationship_Wife",
+    "type": "binary"
+  },
+  {
+    "name": "sex_Female",
+    "type": "binary"
+  },
+  {
+    "name": "workclass_Govt_employees",
+    "type": "binary"
+  },
+  {
+    "name": "workclass_Never-worked",
+    "type": "binary"
+  },
+  {
+    "name": "workclass_Private",
+    "type": "binary"
+  },
+  {
+    "name": "workclass_Self_employed",
+    "type": "binary"
+  },
+  {
+    "name": "workclass_Without-pay",
+    "type": "binary"
+  },
+  {
+    "name": "age",
+    "type": "numeric"
+  },
+  {
+    "name": "capital.gain",
+    "type": "numeric"
+  },
+  {
+    "name": "capital.loss",
+    "type": "numeric"
+  },
+  {
+    "name": "hours.per.week",
+    "type": "numeric"
+  }
+]
