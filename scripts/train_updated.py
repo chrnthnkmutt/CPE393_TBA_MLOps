@@ -5,18 +5,10 @@ import pandas as pd
 import warnings
 import pickle
 import os
-from sklearn.model_selection import train_test_split,cross_val_score,GridSearchCV
+from sklearn.model_selection import train_test_split,cross_val_score
 from sklearn.linear_model import LogisticRegression
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.svm import SVC
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.ensemble import RandomForestClassifier,AdaBoostClassifier,BaggingClassifier,ExtraTreesClassifier
-from sklearn.naive_bayes import GaussianNB
+from sklearn.ensemble import RandomForestClassifier,GradientBoostingClassifier
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
-from sklearn.ensemble import AdaBoostClassifier
-from sklearn.ensemble import GradientBoostingClassifier
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.ensemble import ExtraTreesClassifier
 from sklearn.metrics import accuracy_score,confusion_matrix,roc_auc_score
 from sklearn import metrics
 from datetime import datetime
