@@ -26,12 +26,54 @@ with open("features.json") as f:
 # curl http://localhost:5000/api/health
 @app.route("/api/health", methods=["GET"])
 def health():
-    return jsonify({"status": "ok"})
+    try:
+        # Check if model is loaded
+        if not hasattr(app, 'model'):
+            return jsonify({"status": "error", "message": "Model not loaded"}), 500
+            
+        # Check if model file exists
+        if not os.path.exists(RF_model_path):
+            return jsonify({"status": "error", "message": "Model file not found"}), 500
+            
+        # Check if features file exists
+        if not os.path.exists("features.json"):
+            return jsonify({"status": "error", "message": "Features file not found"}), 500
+            
+        # Check if model can make a basic prediction
+        test_input = {name: 0 for name in feature_names}
+        df = pd.DataFrame([test_input])
+        try:
+            model.predict(df)
+        except Exception as e:
+            return jsonify({"status": "error", "message": f"Model prediction failed: {str(e)}"}), 500
+            
+        return jsonify({
+            "status": "ok",
+            "model_loaded": True,
+            "model_type": type(model).__name__
+        })
+        
+    except Exception as e:
+        return jsonify({"status": "error", "message": f"Health check failed: {str(e)}"}), 500
 
 # curl http://localhost:5000/api/features
 @app.route("/api/features", methods=["GET"])
 def get_features():
-    return jsonify(feature_info)
+    try:
+        if not feature_info:
+            return jsonify({"status": "error", "message": "No features information available"}), 500
+            
+        return jsonify({
+            "status": "success",
+            "features": feature_info,
+            "count": len(feature_info)
+        })
+        
+    except Exception as e:
+        return jsonify({
+            "status": "error", 
+            "message": f"Failed to retrieve features: {str(e)}"
+        }), 500
 
 
 @app.route("/api/predict", methods=["POST"])
@@ -70,31 +112,96 @@ def predict_proba():
 
 @app.route("/api/model_info", methods=["GET"])
 def model_info():
-    return jsonify({
-        "model_type": type(model).__name__,
-        "training_date": "2025-05-23",
-        "n_features": len(feature_names),
-        "n_estimators": getattr(model, "n_estimators", None),
-        "max_depth": getattr(model, "max_depth", None)
-    })
+    try:
+        # Check if model is loaded
+        if not model:
+            return jsonify({
+                "status": "error",
+                "message": "Model not loaded"
+            }), 500
+
+        # Get model attributes safely
+        model_attributes = {
+            "model_type": type(model).__name__,
+            "training_date": "2025-05-23",
+            "n_features": len(feature_names) if feature_names else 0,
+            "n_estimators": getattr(model, "n_estimators", None),
+            "max_depth": getattr(model, "max_depth", None)
+        }
+
+        # Validate required fields
+        if not model_attributes["model_type"]:
+            raise ValueError("Model type not available")
+
+        return jsonify({
+            "status": "success",
+            "data": model_attributes
+        })
+
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": f"Failed to retrieve model information: {str(e)}"
+        }), 500
 
 
 @app.route("/api/explain", methods=["POST"])
 def explain():
-    if hasattr(model, "feature_importances_"):
+    try:
+        # Check if model is loaded
+        if not model:
+            return jsonify({
+                "status": "error",
+                "message": "Model not loaded"
+            }), 500
+
+        # Check if model supports feature importances
+        if not hasattr(model, "feature_importances_"):
+            return jsonify({
+                "status": "error",
+                "message": "This model does not provide feature importances"
+            }), 400
+
+        # Get feature importances
         importances = dict(zip(feature_names, model.feature_importances_))
         sorted_importances = dict(sorted(importances.items(), key=lambda x: x[1], reverse=True))
-        return jsonify(sorted_importances)
-    else:
-        return jsonify({"error": "This model does not provide feature importances."}), 400
 
-# curl http://localhost:5000/api/metrics
+        return jsonify({
+            "status": "success",
+            "data": sorted_importances
+        })
+
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": f"Failed to explain model: {str(e)}"
+        }), 500
+
 @app.route("/api/metrics", methods=["GET"])
 def metrics():
-    with open('RF_metrics.json', 'r') as f:
-        metrics = json.load(f)
-    return jsonify(metrics)
+    try:
+        with open('RF_metrics.json', 'r') as f:
+            metrics = json.load(f)
+        return jsonify(metrics)
+    except FileNotFoundError:
+        return jsonify({"error": "Metrics file not found"}), 404
+    except json.JSONDecodeError:
+        return jsonify({"error": "Invalid JSON format in metrics file"}), 500
+    except Exception as e:
+        return jsonify({"error": f"Unexpected error: {str(e)}"}), 500
 
+@app.route("/api/model_card", methods=["GET"])
+def model_card():
+    try:
+        with open("modelCard.json", "r") as f:
+            card = json.load(f)
+        return jsonify(card)
+    except FileNotFoundError:
+        return jsonify({"error": "Model card file not found"}), 404
+    except json.JSONDecodeError:
+        return jsonify({"error": "Invalid JSON format in model card file"}), 500
+    except Exception as e:
+        return jsonify({"error": f"Unexpected error: {str(e)}"}), 500
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
