@@ -15,6 +15,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 RF_model_path = os.path.join(BASE_DIR, "production_models", "RF_model_prod.pkl")
 # GBM_model_path = os.path.join(BASE_DIR, "production_models", "GBM_model_prod.pkl")
+FEATURES_PATH = os.path.join(BASE_DIR, "features.json")
 
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
@@ -24,7 +25,7 @@ with open(RF_model_path, 'rb') as f:
     model = pickle.load(f)
 
 
-with open("features.json") as f:
+with open(FEATURES_PATH) as f:
     feature_info = json.load(f)
     feature_names = [f["name"] for f in feature_info]
     
