@@ -9,7 +9,8 @@ RUN conda env create -f environment.yml
 SHELL ["conda", "run", "-n", "mlops-project", "/bin/bash", "-c"]
 
 COPY app.py .
-COPY RF_model_prod.pkl .
+COPY production_models/RF_model_prod.pkl .
+COPY production_models/GBM_model_prod.pkl .
 COPY features.json .
 
 EXPOSE 5000

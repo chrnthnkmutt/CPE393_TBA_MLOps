@@ -3,12 +3,18 @@ from flask_cors import CORS
 import pickle
 import pandas as pd
 import json
+import os
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+RF_model_path = os.path.join(BASE_DIR, "production_models", "RF_model_prod.pkl")
+GBM_model_path = os.path.join(BASE_DIR, "production_models", "GBM_model_prod.pkl")
 
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
 
 
-with open('RF_model_prod.pkl', 'rb') as f:
+with open(RF_model_path, 'rb') as f:
     model = pickle.load(f)
 
 
@@ -31,19 +37,35 @@ def get_features():
 @app.route("/api/predict", methods=["POST"])
 def predict():
     data = request.get_json()
+
+    # Check for missing features
+    missing = [name for name in feature_names if name not in data]
+    if missing:
+        print(f"⚠️ Missing data. Filling with 0 : {missing}")
+
+    # Create a vector with missing values replaced by 0
     input_vector = {name: data.get(name, 0) for name in feature_names}
     df = pd.DataFrame([input_vector])
+
     prediction = model.predict(df)[0]
     label = ">50K" if prediction else "<=50K"
-    return jsonify({"prediction": label})
+    return jsonify({"prediction": label, "missing_features": missing})
+
 
 @app.route("/api/predict_proba", methods=["POST"])
 def predict_proba():
     data = request.get_json()
+    missing = [name for name in feature_names if name not in data]
+
     input_vector = {name: data.get(name, 0) for name in feature_names}
     df = pd.DataFrame([input_vector])
     proba = model.predict_proba(df)[0]
-    return jsonify(dict(zip(model.classes_.astype(str), proba.tolist())))
+
+    return jsonify({
+        "probabilities": dict(zip(model.classes_.astype(str), proba.tolist())),
+        "missing_features": missing
+    })
+
 
 
 @app.route("/api/model_info", methods=["GET"])
@@ -59,9 +81,12 @@ def model_info():
 
 @app.route("/api/explain", methods=["POST"])
 def explain():
-    importances = dict(zip(feature_names, model.feature_importances_))
-    sorted_importances = dict(sorted(importances.items(), key=lambda x: x[1], reverse=True))
-    return jsonify(sorted_importances)
+    if hasattr(model, "feature_importances_"):
+        importances = dict(zip(feature_names, model.feature_importances_))
+        sorted_importances = dict(sorted(importances.items(), key=lambda x: x[1], reverse=True))
+        return jsonify(sorted_importances)
+    else:
+        return jsonify({"error": "This model does not provide feature importances."}), 400
 
 # curl http://localhost:5000/api/metrics
 @app.route("/api/metrics", methods=["GET"])

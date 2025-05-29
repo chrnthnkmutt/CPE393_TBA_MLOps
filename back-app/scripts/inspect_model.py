@@ -5,8 +5,8 @@ import os
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-RF_model_path = os.path.join(BASE_DIR, "..", "production_models", "RF_model_20250529_075712.pkl")
-GBM_model_path = os.path.join(BASE_DIR, "..", "production_models", "GBM_model_20250529_075710.pkl")
+RF_model_path = os.path.join(BASE_DIR, "..", "production_models", "RF_model_prod.pkl")
+GBM_model_path = os.path.join(BASE_DIR, "..", "production_models", "GBM_model_prod.pkl")
 
 def inspect_model(model, model_name):
     print(f"\n{'='*50}")
