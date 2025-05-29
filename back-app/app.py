@@ -91,6 +91,80 @@ def get_features():
             "status": "error", 
             "message": f"Failed to retrieve features: {str(e)}"
         }), 500
+        
+        
+
+# Mapping front → back 
+value_map = {
+    # éducation
+    "education_assoc_acdm":  "education_Assoc-acdm",
+    "education_assoc_voc":   "education_Assoc-voc",
+    "education_bachelors":   "education_Bachelors",
+    "education_doctorate":   "education_Doctorate",
+    "education_hs_grad":     "education_HS-grad",
+    "education_masters":     "education_Masters",
+    "education_prof_school": "education_Prof-school",
+    # marital.status
+    "marital_status_married":       "marital.status_Married",
+    "marital_status_never_married": "marital.status_Never-married",
+    "marital_status_separated":     "marital.status_Separated",
+    "marital_status_widowed":       "marital.status_Widowed",
+    # occupation
+    "occupation_adm_clerical":      "occupation_Adm-clerical",
+    "occupation_armed_forces":      "occupation_Armed-Forces",
+    "occupation_craft_repair":      "occupation_Craft-repair",
+    "occupation_exec_managerial":   "occupation_Exec-managerial",
+    "occupation_farming_fishing":   "occupation_Farming-fishing",
+    "occupation_handlers_cleaners": "occupation_Handlers-cleaners",
+    "occupation_machine_op_inspct": "occupation_Machine-op-inspct",
+    "occupation_priv_house_serv":   "occupation_Priv-house-serv",
+    "occupation_prof_specialty":    "occupation_Prof-specialty",
+    "occupation_protective_serv":   "occupation_Protective-serv",
+    "occupation_sales":             "occupation_Sales",
+    "occupation_tech_support":      "occupation_Tech-support",
+    "occupation_transport_moving":  "occupation_Transport-moving",
+    # race
+    "race_amer_indian_eskimo":      "race_Amer-Indian-Eskimo",
+    "race_asian_pac_islander":      "race_Asian-Pac-Islander",
+    "race_other":                   "race_Other",
+    "race_white":                   "race_White",
+    # relationship
+    "relationship_husband":         "relationship_Husband",
+    "relationship_not_in_family":   "relationship_Not-in-family",
+    "relationship_other_relative":  "relationship_Other-relative",
+    "relationship_own_child":       "relationship_Own-child",
+    "relationship_unmarried":       "relationship_Unmarried",
+    "relationship_wife":            "relationship_Wife",
+    # workclass
+    "workclass_govt_employees":     "workclass_Govt_employees",
+    "workclass_never_worked":       "workclass_Never-worked",
+    "workclass_private":            "workclass_Private",
+    "workclass_self_employed":      "workclass_Self_employed",
+    "workclass_without_pay":        "workclass_Without-pay",
+    # sex
+    "sex_female":                   "sex_Female",
+    # NOTE: sex_male → toutes les colonnes `sex_…` restent à 0
+}
+
+def transform_payload_to_vector(data: dict) -> dict:
+
+    vec = {feat: 0 for feat in feature_names}
+
+    vec["age"]             = float(data.get("age", 0))
+    vec["capital.gain"]    = float(data.get("capital_gain", 0))
+    vec["capital.loss"]    = float(data.get("capital_loss", 0))
+    vec["hours.per.week"]  = float(data.get("hours_per_week", 0))
+
+    for field in ("education_level", "marital_status", "occupation",
+                  "race", "relationship", "workclass", "sex"):
+        val = data.get(field)
+        if val:
+            mapped = value_map.get(val)
+            if mapped and mapped in vec:
+                vec[mapped] = 1
+
+    return vec
+
 
 
 @app.route("/api/predict", methods=["POST"])
@@ -98,38 +172,41 @@ def predict():
     logger.info("Prediction request received")
     data = request.get_json()
 
-    # Check for missing features
-    missing = [name for name in feature_names if name not in data]
-    if missing:
-        logger.warning(f"Missing features in prediction request: {missing}")
+    # # Check for missing features
+    # missing = [name for name in feature_names if name not in data]
+    # if missing:
+    #     logger.warning(f"Missing features in prediction request: {missing}")
 
     # Create a vector with missing values replaced by 0
-    input_vector = {name: data.get(name, 0) for name in feature_names}
+    # input_vector = {name: data.get(name, 0) for name in feature_names}
+    input_vector = transform_payload_to_vector(data)
     df = pd.DataFrame([input_vector])
 
     prediction = model.predict(df)[0]
     label = ">50K" if prediction else "<=50K"
     logger.info(f"Prediction completed: {label}")
-    return jsonify({"prediction": label, "missing_features": missing})
+    # return jsonify({"prediction": label, "missing_features": missing})
+    return jsonify({"prediction": label})
 
 
 @app.route("/api/predict_proba", methods=["POST"])
 def predict_proba():
     logger.info("Probability prediction request received")
     data = request.get_json()
-    missing = [name for name in feature_names if name not in data]
+    # missing = [name for name in feature_names if name not in data]
 
-    if missing:
-        logger.warning(f"Missing features in probability prediction request: {missing}")
+    # if missing:
+    #     logger.warning(f"Missing features in probability prediction request: {missing}")
 
-    input_vector = {name: data.get(name, 0) for name in feature_names}
+    # input_vector = {name: data.get(name, 0) for name in feature_names}
+    input_vector = transform_payload_to_vector(data)
     df = pd.DataFrame([input_vector])
     proba = model.predict_proba(df)[0]
 
     logger.info("Probability prediction completed successfully")
     return jsonify({
         "probabilities": dict(zip(model.classes_.astype(str), proba.tolist())),
-        "missing_features": missing
+        # "missing_features": missing
     })
 
 
@@ -175,6 +252,7 @@ def model_info():
             "status": "error",
             "message": f"Failed to retrieve model information: {str(e)}"
         }), 500
+
 
 
 @app.route("/api/explain", methods=["POST"])

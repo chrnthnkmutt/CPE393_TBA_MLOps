@@ -121,6 +121,7 @@ export function CompleteAnalysis() {
     
     async function onSubmit(values: z.infer<typeof formSchema>) {
         try {
+            console.log("values", values);
             const response = await fetch("http://localhost:5000/api/predict", {
                 method: "POST",
                 headers: {
