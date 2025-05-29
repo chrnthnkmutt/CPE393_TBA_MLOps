@@ -19,6 +19,7 @@ dependencies:
   - pip
   - flask
   - flask-cors
+  - pytest
   - pip:
       - keras
       - tensorflow
