@@ -18,7 +18,7 @@
     },
     "model_architecture": {
       "type": "Logistic Regression",
-      "description": "Statistical model that uses a logistic function to model a binary dependent variable.",
+      "description": "Statistical and binary classification model that uses a logistic function to model a binary dependent variable.",
       "input_format": "Numerical and categorical features after preprocessing (including one-hot encoding).",
       "output_format": "Predicted class label and associated probabilities."
     },
