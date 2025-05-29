@@ -1,6 +1,6 @@
 {
     "model_details": {
-      "name": "RF",
+      "name": "LR",
       "version": "1",
       "developers": "TBA_MLOPs Group",
       "framework": "scikit-learn",
@@ -17,8 +17,8 @@
       "out_of_scope_use": "The model should not be used for discriminatory decisions based on protected attributes (e.g., race, sex) or for high-stakes decisions without human review."
     },
     "model_architecture": {
-      "type": "Random Forest",
-      "description": "Ensemble method using multiple decision trees trained on random subsets of data and features, and aggregating predictions by majority vote.",
+      "type": "Logistic Regression",
+      "description": "Statistical model that uses a logistic function to model a binary dependent variable.",
       "input_format": "Numerical and categorical features after preprocessing (including one-hot encoding).",
       "output_format": "Predicted class label and associated probabilities."
     },
