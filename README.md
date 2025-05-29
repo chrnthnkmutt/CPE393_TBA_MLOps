@@ -1,12 +1,44 @@
-# CPE393_TBA_MLOps
+# US Adult Census Income Prediction with Three-Models Classification Within Machine Learning Operation Process Repository
 
-## Installation
+Created By TBA_MLOps Group for CPE393 Special Topics III: Machine Learning Operation
+
+## About
+
+ This repository is aimed at developing and deploying a robust MLOps pipeline for predicting the income level of adults in the United States. The core problem addresses the need to classify whether an individual's income exceeds $50K per year based on various demographic factors.
+
+## Prerequisites
+
+Before setting up the project, ensure you have the following software installed:
+
+- **Python 3.10+**: The core language for backend, scripts, and ML workflows.
+- **Conda (Anaconda/Miniconda)**: For managing environments and dependencies.
+- **Docker**: For containerizing and running the application in isolated environments.
+- **Git**: For cloning and managing the repository.
+- **Jupyter Notebook/Lab**: For running and editing notebooks (optional, but recommended).
+
+> Ensure your system PATH includes Python, Conda, Docker, and Git executables.
+
+## Installation and Running
+
+use conda to create the environment and activate it.
+
+```
+conda env create -f environment.yml
+conda activate mlops-project
+```
 
 To install the required dependencies, run the following command:
 
 ```bash
 pip install -r requirements.txt
 ```
+
+To run the web deployment, run the following command:
+
+```
+docker compose up --build --remove-orphans
+```
+and click at localhost:3000.
 
 ## Model Card
 
@@ -55,7 +87,7 @@ pip install -r requirements.txt
 	- Numerical features were normalized using MinMaxScaler.
 	- Categorical features were one-hot encoded.
 - **Data balance**: Class distribution, potential biases.
-	- The document includes some visualizations (pie charts) showing the distribution of gender within income groups (>$50K and <=$50K). However, it doesn't provide a detailed class distribution of the target variable (`income`). A full data balance assessment would typically involve showing the proportion of individuals with income >$50K versus <=$50K.
+	- The document includes some visualizations (pie charts) showing the distribution of gender within income groups (>$50K and <=$50K). However, it doesn't provide a detailed class distribution of the target variable (`income`). A full data balance assessment would typically involve showing the proportion of individuals with income > $50K versus <= $50K.
 	- Potential biases are discussed in the document, noting that the dataset is based on 1994 census data, which may limit its representativeness of current income trends.
 
 ---
@@ -78,7 +110,7 @@ pip install -r requirements.txt
 		- Recall: 0.9387
 		- F1 score: 0.9018
 		- AUC: 0.7044
-	- Random Forest (For Trial Deployment - as its data robustness - bias
+	- Random Forest (For Trial Deployment - as its data robustness - bias)
 		- Accuracy: 0.7961
 		- Precision: 0.8577
 		- Recall: 0.8884
@@ -120,7 +152,7 @@ pip install -r requirements.txt
     - Charunthon Limseelo: boat.charunthon@gmail.com
 - **Planned updates**:
 	- Automated model retraining based on detected dataset drift. This suggests a plan for ongoing model updates to maintain accuracy.
-	- Continuous monitoring of model performance and data quality.
+	- Continuous monitoring of model performance and data quality. 
 
 ## Directory Structure
 
@@ -199,14 +231,14 @@ CPE393_TBA_MLOps/
 
     Docker usage : 
 
+	```
     docker build -t ml-project .
 
     docker run -p 8888:8888 -v $(pwd):/app ml-project
 
     and you can access the jupyter notebook at http://localhost:8888/
-
+	```
 )
-
 
 ### Setting Up the Environment
 
@@ -223,7 +255,7 @@ cd CPE393_TBA_MLOps
 pip install -r requirements.txt
 ```
 
-### Running the Scripts
+### Running the Training Scripts
 
 To run the training script, use the following command:
 
@@ -238,25 +270,9 @@ The Jupyter notebooks are located in the `notebooks/` directory. You can open an
 ```bash
 jupyter notebook notebooks/01_Analyze_and_Visualization.ipynb
 jupyter notebook notebooks/02_compare-all-the-classification-models.ipynb
+jupyter notebook notebooks/03_ModelMornitoring.ipynb
 ```
 
 ## Additional Information
 
-This repository is structured to follow best practices for Machine Learning Operations (MLOps). The directory structure separates different functionalities such as data processing, model training, and evaluation. This helps in maintaining a clean and organized codebase, making it easier to manage and scale machine learning projects.
-
-## Checklist
-✅   Training Data Management
-
-_   Containerize with Docker (Romain)
-
-✅   Data Cleansing and Feature Engineering
-
-✅   Building Data Pipeline
-
-✅   Hyperparameter Tuning
-
-✅   Model Development and Experiment Tracking (MLFlow - Tee) - Wednesday Night
-
-_   Model Deployment and Flask (Romain)
-
-✅   Model Mornitoring (Japan, Boat, Tee) - Tomorrow
+This repository is structured to follow best practices for Machine Learning Operations (MLOps). The directory structure separates different functionalities such as data processing, model training, and evaluation. This helps in maintaining a clean and organized codebase, making it easier to manage and scale machine learning projects. Along with, each folder will provide you the information for running and installing inside within the folder. 
