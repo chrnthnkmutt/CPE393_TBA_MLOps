@@ -18,22 +18,40 @@ Before setting up the project, ensure you have the following software installed:
 
 > Ensure your system PATH includes Python, Conda, Docker, and Git executables.
 
-## Installation and Running
+## Setting Up the Environment, Installing, and Running
 
-use conda to create the environment and activate it.
+1. Clone the repository:
 
+```bash
+git clone https://github.com/chrnthnkmutt/CPE393_TBA_MLOps.git
+cd CPE393_TBA_MLOps
 ```
-conda env create -f environment.yml
-conda activate mlops-project
-```
 
-To install the required dependencies, run the following command:
+2. Install the required dependencies:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-To run the web deployment, run the following command:
+3. use conda to create the environment and activate it.
+
+```
+conda env create -f environment.yml
+conda activate mlops-project
+```
+4. To install the required dependencies, run the following command:
+
+```bash
+pip install -r requirements.txt
+```
+
+5. To run the training script, use the following command:
+
+```bash
+python scripts/train.py
+```
+
+6. To run the web deployment, run the following command:
 
 ```
 docker compose up --build --remove-orphans
@@ -216,51 +234,6 @@ CPE393_TBA_MLOps/
 ├── requirements.txt              # Python dependencies
 ├── environment.yml               # Conda environment file
 └── README.md                     # Main project documentation
-```
-
-## Usage
-
-(
-
-    not available yet, but you can use conda to create the environment and activate it.
-
-    ```
-    conda env create -f environment.yml
-    conda activate mlops-project
-    ```
-
-    Docker usage : 
-
-	```
-    docker build -t ml-project .
-
-    docker run -p 8888:8888 -v $(pwd):/app ml-project
-
-    and you can access the jupyter notebook at http://localhost:8888/
-	```
-)
-
-### Setting Up the Environment
-
-1. Clone the repository:
-
-```bash
-git clone https://github.com/chrnthnkmutt/CPE393_TBA_MLOps.git
-cd CPE393_TBA_MLOps
-```
-
-2. Install the required dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
-### Running the Training Scripts
-
-To run the training script, use the following command:
-
-```bash
-python scripts/train.py
 ```
 
 ### Using the Notebooks
