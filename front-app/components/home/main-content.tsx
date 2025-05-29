@@ -1,6 +1,5 @@
 "use client"
 
-
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -10,8 +9,8 @@ import useSWR from 'swr';
 import ApiList from "./apiList"
 import { ModelInfo } from "./model-info"
 import { ModelMetrics } from "./model-metrics"
-import { CompleteAnalysis } from "./complete-analysis"
-
+// import { CompleteAnalysis } from "./complete-analysis"
+import { CompleteAnalysisOrange } from "./complete-analysisOrange"
 
 /*
 api list :
@@ -49,14 +48,18 @@ export function MainContent() {
   const { data: metricsData, error: metricsError, isLoading: metricsLoading } = useSWR(API_ENDPOINTS.metrics, fetcher);
 
   return (
-    <div className="flex flex-col md:flex-row-reverse container mx-auto">
-      <div className="flex flex-col gap-4 my-4">
-        <ModelInfo info={modelInfoData} isLoading={modelInfoLoading} error={modelInfoError} />
-        <ApiList />
-        <ModelMetrics metrics={metricsData} isLoading={metricsLoading} error={metricsError} />
+    <div className="flex flex-col md:flex-row-reverse container mx-auto bg-gradient-to-br from-orange-50 to-amber-50 min-h-screen">
+      <div className="flex flex-col gap-4 my-4 p-4">
+        <div className="space-y-4">
+          <ModelInfo info={modelInfoData} isLoading={modelInfoLoading} error={modelInfoError} />
+          <ApiList />
+          <ModelMetrics metrics={metricsData} isLoading={metricsLoading} error={metricsError} />
+        </div>
       </div>
-      <CompleteAnalysis />
+      {/* <CompleteAnalysis /> */}
+      <div className="flex-1">
+        <CompleteAnalysisOrange />
+      </div>
     </div>
-
   )
 }
