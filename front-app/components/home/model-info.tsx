@@ -7,20 +7,22 @@ import { MdElectricBolt } from "react-icons/md";
 
 interface ModelInfoProps {
     info?: {
-        model_type: string;
-        n_estimators: number;
-        n_features: number;
-        training_date: string;
-        max_depth: number | null;
-        [key: string]: any;
-    }
+        data: {
+            model_type: string;
+            n_estimators: number;
+            n_features: number;
+            training_date: string;
+            max_depth: number | null;
+        };
+        status: string;
+    };
     isLoading: boolean;
     error: Error | null;
 }
 
 export function ModelInfo({ info, isLoading, error }: ModelInfoProps) {
-    const formattedDate = info?.training_date
-      ? new Date(info.training_date).toLocaleDateString("en-US", {
+    const formattedDate = info?.data?.training_date
+      ? new Date(info.data.training_date).toLocaleDateString("en-US", {
           year: "numeric",
           month: "long",
           day: "numeric",
@@ -95,7 +97,7 @@ export function ModelInfo({ info, isLoading, error }: ModelInfoProps) {
           <div className="flex items-center gap-2">
               <Database className="w-3 h-3 mr-1" />
               Type
-            <span className="font-medium">{info.model_type}</span>
+            <span className="font-medium">{info.data.model_type}</span>
           </div>
   
           {formattedDate && (
@@ -109,22 +111,22 @@ export function ModelInfo({ info, isLoading, error }: ModelInfoProps) {
           <div className="flex items-center gap-2">
             <MdElectricBolt className="w-3 h-3 mr-1" />
               Number of Estimators
-            <span>{info.n_estimators}</span>
+            <span>{info.data.n_estimators}</span>
           </div>
 
           <div className="flex items-center gap-2">
             <BrainCircuit className="w-3 h-3 mr-1" />
               Number of Features
             
-            <span>{info.n_features}</span>
+            <span>{info.data.n_features}</span>
           </div>
 
-          {info.max_depth && (
+          {info.data.max_depth && (
             <div className="flex items-center gap-2">
               <Badge variant="outline" className="px-2 py-1">
                 Max Depth
               </Badge>
-              <span>{info.max_depth}</span>
+              <span>{info.data.max_depth}</span>
             </div>
           )}
         </CardContent>

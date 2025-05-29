@@ -15,4 +15,6 @@ COPY features.json .
 
 EXPOSE 5000
 
-CMD ["conda", "run", "-n", "mlops-project", "python", "app.py"]
+# CMD ["conda", "run", "-n", "mlops-project", "python", "app.py"]
+CMD ["bash", "-c", "conda run -n mlops-project python app.py"]
+

@@ -4,11 +4,17 @@ import pickle
 import pandas as pd
 import json
 import os
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 RF_model_path = os.path.join(BASE_DIR, "production_models", "RF_model_prod.pkl")
-GBM_model_path = os.path.join(BASE_DIR, "production_models", "GBM_model_prod.pkl")
+# GBM_model_path = os.path.join(BASE_DIR, "production_models", "GBM_model_prod.pkl")
 
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
@@ -27,16 +33,20 @@ with open("features.json") as f:
 @app.route("/api/health", methods=["GET"])
 def health():
     try:
+        logger.info("Health check request received")
         # Check if model is loaded
         if not hasattr(app, 'model'):
+            logger.error("Model not loaded during health check")
             return jsonify({"status": "error", "message": "Model not loaded"}), 500
             
         # Check if model file exists
         if not os.path.exists(RF_model_path):
+            logger.error(f"Model file not found at {RF_model_path}")
             return jsonify({"status": "error", "message": "Model file not found"}), 500
             
         # Check if features file exists
         if not os.path.exists("features.json"):
+            logger.error("Features file not found")
             return jsonify({"status": "error", "message": "Features file not found"}), 500
             
         # Check if model can make a basic prediction
@@ -45,8 +55,10 @@ def health():
         try:
             model.predict(df)
         except Exception as e:
+            logger.error(f"Model prediction failed during health check: {str(e)}")
             return jsonify({"status": "error", "message": f"Model prediction failed: {str(e)}"}), 500
             
+        logger.info("Health check completed successfully")
         return jsonify({
             "status": "ok",
             "model_loaded": True,
@@ -54,15 +66,19 @@ def health():
         })
         
     except Exception as e:
+        logger.error(f"Health check failed with unexpected error: {str(e)}")
         return jsonify({"status": "error", "message": f"Health check failed: {str(e)}"}), 500
 
 # curl http://localhost:5000/api/features
 @app.route("/api/features", methods=["GET"])
 def get_features():
     try:
+        logger.info("Features request received")
         if not feature_info:
+            logger.error("No features information available")
             return jsonify({"status": "error", "message": "No features information available"}), 500
             
+        logger.info(f"Successfully retrieved {len(feature_info)} features")
         return jsonify({
             "status": "success",
             "features": feature_info,
@@ -70,6 +86,7 @@ def get_features():
         })
         
     except Exception as e:
+        logger.error(f"Failed to retrieve features: {str(e)}")
         return jsonify({
             "status": "error", 
             "message": f"Failed to retrieve features: {str(e)}"
@@ -78,12 +95,13 @@ def get_features():
 
 @app.route("/api/predict", methods=["POST"])
 def predict():
+    logger.info("Prediction request received")
     data = request.get_json()
 
     # Check for missing features
     missing = [name for name in feature_names if name not in data]
     if missing:
-        print(f"⚠️ Missing data. Filling with 0 : {missing}")
+        logger.warning(f"Missing features in prediction request: {missing}")
 
     # Create a vector with missing values replaced by 0
     input_vector = {name: data.get(name, 0) for name in feature_names}
@@ -91,30 +109,41 @@ def predict():
 
     prediction = model.predict(df)[0]
     label = ">50K" if prediction else "<=50K"
+    logger.info(f"Prediction completed: {label}")
     return jsonify({"prediction": label, "missing_features": missing})
 
 
 @app.route("/api/predict_proba", methods=["POST"])
 def predict_proba():
+    logger.info("Probability prediction request received")
     data = request.get_json()
     missing = [name for name in feature_names if name not in data]
+
+    if missing:
+        logger.warning(f"Missing features in probability prediction request: {missing}")
 
     input_vector = {name: data.get(name, 0) for name in feature_names}
     df = pd.DataFrame([input_vector])
     proba = model.predict_proba(df)[0]
 
+    logger.info("Probability prediction completed successfully")
     return jsonify({
         "probabilities": dict(zip(model.classes_.astype(str), proba.tolist())),
         "missing_features": missing
     })
 
 
+def is_model_loaded():
+    return 'model' in globals() and model is not None
+
 
 @app.route("/api/model_info", methods=["GET"])
 def model_info():
     try:
+        logger.info("Model info request received")
         # Check if model is loaded
-        if not model:
+        if not is_model_loaded():
+            logger.error("Model not loaded during model info request")
             return jsonify({
                 "status": "error",
                 "message": "Model not loaded"
@@ -131,14 +160,17 @@ def model_info():
 
         # Validate required fields
         if not model_attributes["model_type"]:
+            logger.error("Model type not available")
             raise ValueError("Model type not available")
 
+        logger.info("Model info retrieved successfully")
         return jsonify({
             "status": "success",
             "data": model_attributes
         })
 
     except Exception as e:
+        logger.error(f"Failed to retrieve model information: {str(e)}")
         return jsonify({
             "status": "error",
             "message": f"Failed to retrieve model information: {str(e)}"
@@ -148,8 +180,10 @@ def model_info():
 @app.route("/api/explain", methods=["POST"])
 def explain():
     try:
+        logger.info("Model explanation request received")
         # Check if model is loaded
         if not model:
+            logger.error("Model not loaded during explanation request")
             return jsonify({
                 "status": "error",
                 "message": "Model not loaded"
@@ -157,6 +191,7 @@ def explain():
 
         # Check if model supports feature importances
         if not hasattr(model, "feature_importances_"):
+            logger.error("Model does not provide feature importances")
             return jsonify({
                 "status": "error",
                 "message": "This model does not provide feature importances"
@@ -166,12 +201,14 @@ def explain():
         importances = dict(zip(feature_names, model.feature_importances_))
         sorted_importances = dict(sorted(importances.items(), key=lambda x: x[1], reverse=True))
 
+        logger.info("Model explanation completed successfully")
         return jsonify({
             "status": "success",
             "data": sorted_importances
         })
 
     except Exception as e:
+        logger.error(f"Failed to explain model: {str(e)}")
         return jsonify({
             "status": "error",
             "message": f"Failed to explain model: {str(e)}"
@@ -180,27 +217,37 @@ def explain():
 @app.route("/api/metrics", methods=["GET"])
 def metrics():
     try:
+        logger.info("Metrics request received")
         with open('RF_metrics.json', 'r') as f:
             metrics = json.load(f)
+        logger.info("Metrics retrieved successfully")
         return jsonify(metrics)
     except FileNotFoundError:
+        logger.error("Metrics file not found")
         return jsonify({"error": "Metrics file not found"}), 404
     except json.JSONDecodeError:
+        logger.error("Invalid JSON format in metrics file")
         return jsonify({"error": "Invalid JSON format in metrics file"}), 500
     except Exception as e:
+        logger.error(f"Unexpected error while retrieving metrics: {str(e)}")
         return jsonify({"error": f"Unexpected error: {str(e)}"}), 500
 
 @app.route("/api/model_card", methods=["GET"])
 def model_card():
     try:
+        logger.info("Model card request received")
         with open("modelCard.json", "r") as f:
             card = json.load(f)
+        logger.info("Model card retrieved successfully")
         return jsonify(card)
     except FileNotFoundError:
+        logger.error("Model card file not found")
         return jsonify({"error": "Model card file not found"}), 404
     except json.JSONDecodeError:
+        logger.error("Invalid JSON format in model card file")
         return jsonify({"error": "Invalid JSON format in model card file"}), 500
     except Exception as e:
+        logger.error(f"Unexpected error while retrieving model card: {str(e)}")
         return jsonify({"error": f"Unexpected error: {str(e)}"}), 500
 
 if __name__ == "__main__":
