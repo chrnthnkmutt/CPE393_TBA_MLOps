@@ -23,6 +23,17 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 
 import { cn } from "@/lib/utils"
 import { Slider } from "@/components/ui/slider"
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+  } from "@/components/ui/alert-dialog"
 
 const formSchema = z.object({
 
@@ -101,6 +112,10 @@ type FormKeys = keyof FormSchema;
 
 
 export function CompleteAnalysis() {
+
+    const [open, setOpen] = useState(false);
+    const [prediction, setPrediction] = useState<string | null>(null);
+
     
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -121,6 +136,7 @@ export function CompleteAnalysis() {
     
     async function onSubmit(values: z.infer<typeof formSchema>) {
         try {
+            console.log("values", values);
             const response = await fetch("http://localhost:5000/api/predict", {
                 method: "POST",
                 headers: {
@@ -130,6 +146,8 @@ export function CompleteAnalysis() {
             });
             const data = await response.json();
             console.log(data);
+            setPrediction(data.prediction);
+            setOpen(true);
         } catch (error) {
             console.error("Error:", error);
         }
@@ -746,6 +764,24 @@ export function CompleteAnalysis() {
                         </Button>
                     </form>
                 </Form>
+                <AlertDialog open={open} onOpenChange={setOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                    <AlertDialogTitle>Prediction Result</AlertDialogTitle>
+                    <AlertDialogDescription className="text-lg">
+                        {prediction ? (
+                        <>The model predicts a revenue <strong>{prediction}</strong>.</>
+                        ) : (
+                        <>No prediction available.</>
+                        )}
+                    </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                    <AlertDialogCancel onClick={() => setOpen(false)}>Close</AlertDialogCancel>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+                </AlertDialog>
+
             </CardContent>
         </Card>
     )

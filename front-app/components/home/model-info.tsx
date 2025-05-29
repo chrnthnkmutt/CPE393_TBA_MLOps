@@ -7,20 +7,22 @@ import { MdElectricBolt } from "react-icons/md";
 
 interface ModelInfoProps {
     info?: {
-        model_type: string;
-        n_estimators: number;
-        n_features: number;
-        training_date: string;
-        max_depth: number | null;
-        [key: string]: any;
-    }
+        data: {
+            model_type: string;
+            n_estimators: number;
+            n_features: number;
+            training_date: string;
+            max_depth: number | null;
+        };
+        status: string;
+    };
     isLoading: boolean;
     error: Error | null;
 }
 
 export function ModelInfo({ info, isLoading, error }: ModelInfoProps) {
-    const formattedDate = info?.training_date
-      ? new Date(info.training_date).toLocaleDateString("en-US", {
+    const formattedDate = info?.data?.training_date
+      ? new Date(info.data.training_date).toLocaleDateString("en-US", {
           year: "numeric",
           month: "long",
           day: "numeric",
@@ -29,13 +31,13 @@ export function ModelInfo({ info, isLoading, error }: ModelInfoProps) {
   
     if (error) {
         return (
-            <Card className="m-4 md:m-0">
+            <Card className="m-4 md:m-0 border-orange-200 bg-gradient-to-br from-orange-50 to-amber-50">
                 <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-red-500">
+                    <CardTitle className="flex items-center gap-2 text-red-600">
                         <AlertCircle className="w-5 h-5" />
                         Error loading model information
                     </CardTitle>
-                    <CardDescription>{error.message}</CardDescription>
+                    <CardDescription className="text-orange-700">{error.message}</CardDescription>
                 </CardHeader>
             </Card>
         )
@@ -43,39 +45,39 @@ export function ModelInfo({ info, isLoading, error }: ModelInfoProps) {
   
     if (isLoading || !info) {
       return (
-        <Card className="m-4 md:m-0">
+        <Card className="m-4 md:m-0 border-orange-200 bg-gradient-to-br from-orange-50 to-amber-50">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Info className="w-5 h-5" />
+            <CardTitle className="flex items-center gap-2 text-orange-900">
+              <Info className="w-5 h-5 text-orange-600" />
               Model Information
             </CardTitle>
-            <CardDescription>Details about the deployed machine learning model</CardDescription>
+            <CardDescription className="text-orange-700">Details about the deployed machine learning model</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center gap-2">
-              <Database className="w-3 h-3 mr-1" />
+            <div className="flex items-center gap-2 text-orange-800">
+              <Database className="w-3 h-3 mr-1 text-orange-600" />
                 Type
-              <Skeleton className="h-4 w-[100px]" />
+              <Skeleton className="h-4 w-[100px] bg-orange-200" />
             </div>
-            <div className="flex items-center gap-2">
-              <Calendar className="w-3 h-3 mr-1" />
+            <div className="flex items-center gap-2 text-orange-800">
+              <Calendar className="w-3 h-3 mr-1 text-orange-600" />
                 Training Date
-              <Skeleton className="h-4 w-[150px]" />
+              <Skeleton className="h-4 w-[150px] bg-orange-200" />
             </div>
-            <div className="flex items-center gap-2">
-              <MdElectricBolt className="w-3 h-3 mr-1" />
+            <div className="flex items-center gap-2 text-orange-800">
+              <MdElectricBolt className="w-3 h-3 mr-1 text-orange-600" />
                 Number of Estimators
-              <Skeleton className="h-4 w-[50px]" />
+              <Skeleton className="h-4 w-[50px] bg-orange-200" />
             </div>
-            <div className="flex items-center gap-2">
-              <BrainCircuit className="w-3 h-3 mr-1" />
+            <div className="flex items-center gap-2 text-orange-800">
+              <BrainCircuit className="w-3 h-3 mr-1 text-orange-600" />
                 Number of Features
-              <Skeleton className="h-4 w-[50px]" />
+              <Skeleton className="h-4 w-[50px] bg-orange-200" />
             </div>
-            <div className="flex items-center gap-2">
-              <Database className="w-3 h-3 mr-1" />
+            <div className="flex items-center gap-2 text-orange-800">
+              <Database className="w-3 h-3 mr-1 text-orange-600" />
                 Max Depth
-              <Skeleton className="h-4 w-[50px]" />
+              <Skeleton className="h-4 w-[50px] bg-orange-200" />
             </div>
           </CardContent>
         </Card>
@@ -83,48 +85,47 @@ export function ModelInfo({ info, isLoading, error }: ModelInfoProps) {
     }
   
     return (
-      <Card className="m-4 md:m-0">
+      <Card className="m-4 md:m-0 border-orange-200 bg-gradient-to-br from-orange-50 to-amber-50">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Info className="w-5 h-5" />
+          <CardTitle className="flex items-center gap-2 text-orange-900">
+            <Info className="w-5 h-5 text-orange-600" />
             Model Information
           </CardTitle>
-          <CardDescription>Details about the deployed machine learning model</CardDescription>
+          <CardDescription className="text-orange-700">Details about the deployed machine learning model</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center gap-2">
-              <Database className="w-3 h-3 mr-1" />
+          <div className="flex items-center gap-2 text-orange-800">
+              <Database className="w-3 h-3 mr-1 text-orange-600" />
               Type
-            <span className="font-medium">{info.model_type}</span>
+            <span className="font-medium text-orange-900">{info.data.model_type}</span>
           </div>
   
           {formattedDate && (
-            <div className="flex items-center gap-2">
-                <Calendar className="w-3 h-3 mr-1" />
+            <div className="flex items-center gap-2 text-orange-800">
+                <Calendar className="w-3 h-3 mr-1 text-orange-600" />
                 Training Date
-              <span>{formattedDate}</span>
+              <span className="text-orange-900">{formattedDate}</span>
             </div>
           )}
   
-          <div className="flex items-center gap-2">
-            <MdElectricBolt className="w-3 h-3 mr-1" />
+          <div className="flex items-center gap-2 text-orange-800">
+            <MdElectricBolt className="w-3 h-3 mr-1 text-orange-600" />
               Number of Estimators
-            <span>{info.n_estimators}</span>
+            <span className="text-orange-900">{info.data.n_estimators}</span>
           </div>
 
-          <div className="flex items-center gap-2">
-            <BrainCircuit className="w-3 h-3 mr-1" />
+          <div className="flex items-center gap-2 text-orange-800">
+            <BrainCircuit className="w-3 h-3 mr-1 text-orange-600" />
               Number of Features
-            
-            <span>{info.n_features}</span>
+            <span className="text-orange-900">{info.data.n_features}</span>
           </div>
 
-          {info.max_depth && (
-            <div className="flex items-center gap-2">
-              <Badge variant="outline" className="px-2 py-1">
+          {info.data.max_depth && (
+            <div className="flex items-center gap-2 text-orange-800">
+              <Badge variant="outline" className="px-2 py-1 border-orange-300 text-orange-800 bg-orange-100">
                 Max Depth
               </Badge>
-              <span>{info.max_depth}</span>
+              <span className="text-orange-900">{info.data.max_depth}</span>
             </div>
           )}
         </CardContent>
