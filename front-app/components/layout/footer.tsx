@@ -6,7 +6,7 @@ import Link from "next/link";
 export function Footer() {
   return (
     <footer 
-      className="border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+      className="border-t border-orange-200 bg-gradient-to-r from-orange-50 to-amber-50 backdrop-blur supports-[backdrop-filter]:bg-orange-50/90"
       role="contentinfo"
       aria-label="Footer"
     >
@@ -14,19 +14,19 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* About */}
           <div>
-            <h3 className="font-semibold mb-3" id="about-heading">About the project</h3>
-            <p className="text-sm text-muted-foreground mb-3" aria-labelledby="about-heading">
+            <h3 className="font-semibold mb-3 text-orange-900" id="about-heading">About the project</h3>
+            <p className="text-sm text-orange-700 mb-3" aria-labelledby="about-heading">
               Web interface for demonstrating a machine learning income prediction model. Developed with
               Next.js and Flask for an MLOps project.
             </p>
             <div className="flex gap-2" role="list" aria-label="Technologies">
-              <Badge variant="outline" className="text-xs" role="listitem">
+              <Badge variant="outline" className="text-xs border-orange-300 text-orange-800 bg-orange-100" role="listitem">
                 Next.js
               </Badge>
-              <Badge variant="outline" className="text-xs" role="listitem">
+              <Badge variant="outline" className="text-xs border-orange-300 text-orange-800 bg-orange-100" role="listitem">
                 Flask
               </Badge>
-              <Badge variant="outline" className="text-xs" role="listitem">
+              <Badge variant="outline" className="text-xs border-orange-300 text-orange-800 bg-orange-100" role="listitem">
                 scikit-learn
               </Badge>
             </div>
@@ -34,9 +34,9 @@ export function Footer() {
 
           {/* Technologies */}
           <div>
-            <h3 className="font-semibold mb-3" id="tech-heading">Technologies used</h3>
+            <h3 className="font-semibold mb-3 text-orange-900" id="tech-heading">Technologies used</h3>
             <ul 
-              className="text-sm text-muted-foreground space-y-1"
+              className="text-sm text-orange-700 space-y-1"
               aria-labelledby="tech-heading"
             >
               <li>• Frontend: Next.js 15 + TypeScript</li>
@@ -49,11 +49,11 @@ export function Footer() {
 
           {/* Links */}
           <div>
-            <h3 className="font-semibold mb-3" id="resources-heading">Resources</h3>
+            <h3 className="font-semibold mb-3 text-orange-900" id="resources-heading">Resources</h3>
             <div className="space-y-2" aria-labelledby="resources-heading">
               <Link
                 href="https://github.com/chrnthnkmutt/CPE393_TBA_MLOps"
-                className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                className="flex items-center gap-2 text-sm text-orange-700 hover:text-orange-900 transition-colors"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="View source code on GitHub"
@@ -66,7 +66,7 @@ export function Footer() {
                 href="https://github.com/chrnthnkmutt/CPE393_TBA_MLOps"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                className="flex items-center gap-2 text-sm text-orange-700 hover:text-orange-900 transition-colors"
                 aria-label="View API documentation"
               >
                 <ExternalLink className="w-4 h-4" aria-hidden="true" />
@@ -76,8 +76,8 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="border-t mt-8 pt-6 text-center">
-          <p className="text-sm text-muted-foreground">
+        <div className="border-t border-orange-200 mt-8 pt-6 text-center">
+          <p className="text-sm text-orange-700">
             © 2025 MLOps Income Prediction Interface. Educational demonstration project.
           </p>
         </div>

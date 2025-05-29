@@ -9,7 +9,7 @@ import { z } from "zod"
 
 import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Loader2, CheckCircle, AlertCircle, Calculator, TrendingUp, User } from "lucide-react"
+import { Loader2, CheckCircle, AlertCircle, Calculator, TrendingUp, User, BarChart3 } from "lucide-react"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Slider } from "@/components/ui/slider"
 import {
@@ -615,12 +615,22 @@ export function CompleteAnalysisOrange() {
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel
-                    onClick={() => setOpen(false)}
-                    className="border-orange-300 text-orange-700 hover:bg-orange-50"
-                  >
-                    Close
-                  </AlertDialogCancel>
+                  <div className="flex justify-between w-full">
+                    <Button
+                      variant="outline"
+                      onClick={() => window.location.href = '/feature-importance'}
+                      className="border-orange-300 text-orange-700 hover:bg-orange-50"
+                    >
+                      <BarChart3 className="mr-2 h-4 w-4" />
+                      See feature importance
+                    </Button>
+                    <AlertDialogCancel
+                      onClick={() => setOpen(false)}
+                      className="border-orange-300 text-orange-700 hover:bg-orange-50"
+                    >
+                      Close
+                    </AlertDialogCancel>
+                  </div>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
