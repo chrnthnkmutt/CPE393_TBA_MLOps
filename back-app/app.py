@@ -13,15 +13,16 @@ logger = logging.getLogger(__name__)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-RF_model_path = os.path.join(BASE_DIR, "production_models", "RF_model_prod.pkl")
+# RF_model_path = os.path.join(BASE_DIR, "production_models", "RF_model_prod.pkl")
 # GBM_model_path = os.path.join(BASE_DIR, "production_models", "GBM_model_prod.pkl")
+LR_model_path = os.path.join(BASE_DIR, "production_models", "LR_model_prod.pkl")
 FEATURES_PATH = os.path.join(BASE_DIR, "features.json")
 
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
 
 
-with open(RF_model_path, 'rb') as f:
+with open(LR_model_path, 'rb') as f:
     model = pickle.load(f)
 
 
@@ -46,8 +47,8 @@ def health():
             return jsonify({"status": "error", "message": "Model not loaded"}), 500
             
         # Check if model file exists
-        if not os.path.exists(RF_model_path):
-            logger.error(f"Model file not found at {RF_model_path}")
+        if not os.path.exists(LR_model_path):
+            logger.error(f"Model file not found at {LR_model_path}")
             return jsonify({"status": "error", "message": "Model file not found"}), 500
             
         # Check if features file exists
@@ -276,11 +277,48 @@ def model_info():
 
 
 
+# @app.route("/api/explain", methods=["GET"])
+# def explain():
+#     try:
+#         logger.info("Model explanation request received")
+#         # Check if model is loaded
+#         if not model:
+#             logger.error("Model not loaded during explanation request")
+#             return jsonify({
+#                 "status": "error",
+#                 "message": "Model not loaded"
+#             }), 500
+
+#         # Check if model supports feature importances
+#         if not hasattr(model, "feature_importances_"):
+#             logger.error("Model does not provide feature importances")
+#             return jsonify({
+#                 "status": "error",
+#                 "message": "This model does not provide feature importances"
+#             }), 400
+
+#         # Get feature importances
+#         importances = dict(zip(feature_names, model.feature_importances_))
+#         sorted_importances = dict(sorted(importances.items(), key=lambda x: x[1], reverse=True))
+
+#         logger.info("Model explanation completed successfully")
+#         return jsonify({
+#             "status": "success",
+#             "data": sorted_importances
+#         })
+
+#     except Exception as e:
+#         logger.error(f"Failed to explain model: {str(e)}")
+#         return jsonify({
+#             "status": "error",
+#             "message": f"Failed to explain model: {str(e)}"
+#         }), 500
+
 @app.route("/api/explain", methods=["GET"])
 def explain():
     try:
         logger.info("Model explanation request received")
-        # Check if model is loaded
+
         if not model:
             logger.error("Model not loaded during explanation request")
             return jsonify({
@@ -288,16 +326,15 @@ def explain():
                 "message": "Model not loaded"
             }), 500
 
-        # Check if model supports feature importances
-        if not hasattr(model, "feature_importances_"):
-            logger.error("Model does not provide feature importances")
+        if not hasattr(model, "coef_"):
+            logger.error("Model does not provide coefficients for explanation")
             return jsonify({
                 "status": "error",
-                "message": "This model does not provide feature importances"
+                "message": "This model does not provide feature coefficients"
             }), 400
 
-        # Get feature importances
-        importances = dict(zip(feature_names, model.feature_importances_))
+        import numpy as np
+        importances = dict(zip(feature_names, np.abs(model.coef_[0])))
         sorted_importances = dict(sorted(importances.items(), key=lambda x: x[1], reverse=True))
 
         logger.info("Model explanation completed successfully")
@@ -313,11 +350,18 @@ def explain():
             "message": f"Failed to explain model: {str(e)}"
         }), 500
 
+
 @app.route("/api/metrics", methods=["GET"])
 def metrics():
+    # try:
+    #     logger.info("Metrics request received")
+    #     with open('RF_metrics.json', 'r') as f:
+    #         metrics = json.load(f)
+    #     logger.info("Metrics retrieved successfully")
+    #     return jsonify(metrics)
     try:
         logger.info("Metrics request received")
-        with open('RF_metrics.json', 'r') as f:
+        with open('LR_metrics.json', 'r') as f:
             metrics = json.load(f)
         logger.info("Metrics retrieved successfully")
         return jsonify(metrics)

@@ -1,6 +1,6 @@
 "use client"
 
-import { FeatureImportanceChart } from "@/components/home/feature-importance-chart"
+import { FeatureImportanceChartLR } from "@/components/home/feature-importance-chart-LR"
 import useSWR from 'swr';
 
 const API_BASE_URL = "http://localhost:5000";
@@ -14,50 +14,50 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 const sampleData = {
   data: {
-    age: 0.37293559582398894,
+    "age": 0.06320917999236964,
     "capital.gain": 0.0,
     "capital.loss": 0.0,
-    "education_Assoc-acdm": 0.007881611835858327,
-    "education_Assoc-voc": 0.009356314658635727,
-    education_Bachelors: 0.02543649591197348,
-    education_Doctorate: 0.008871248152555964,
-    "education_HS-grad": 0.03432523901657315,
-    education_Masters: 0.015050241950287894,
-    "education_Prof-school": 0.008740030661183049,
-    "hours.per.week": 0.0998995843241709,
-    "marital.status_Married": 0.06952392752725614,
-    "marital.status_Never-married": 0.038960963756152704,
-    "marital.status_Separated": 0.012856919530016697,
-    "marital.status_Widowed": 0.0023187649923606455,
-    "occupation_Adm-clerical": 0.010056627802482327,
-    "occupation_Armed-Forces": 1.4084895559464618e-6,
-    "occupation_Craft-repair": 0.009970293198913377,
-    "occupation_Exec-managerial": 0.0282403257016011,
-    "occupation_Farming-fishing": 0.004072247808932837,
-    "occupation_Handlers-cleaners": 0.00470212349197176,
-    "occupation_Machine-op-inspct": 0.006530991813425924,
-    "occupation_Priv-house-serv": 0.00015205526484627244,
-    "occupation_Prof-specialty": 0.020044614195720224,
-    "occupation_Protective-serv": 0.005382930345716534,
-    occupation_Sales: 0.00996918199088381,
-    "occupation_Tech-support": 0.007734134429948438,
-    "occupation_Transport-moving": 0.006255302466366095,
-    "race_Amer-Indian-Eskimo": 0.00225114582232715,
-    "race_Asian-Pac-Islander": 0.007446750605848536,
-    race_Other: 0.0022358227529066833,
-    race_White: 0.018200296162094867,
-    relationship_Husband: 0.04576658542381273,
-    "relationship_Not-in-family": 0.017211705563012623,
-    "relationship_Other-relative": 0.0024762224070195935,
-    "relationship_Own-child": 0.010536792394087424,
-    relationship_Unmarried: 0.008361797320329087,
-    relationship_Wife: 0.0163452621471333,
-    sex_Female: 0.017313900205767927,
-    workclass_Govt_employees: 0.011302872173192646,
-    "workclass_Never-worked": 0.0,
-    workclass_Private: 0.012904568236610221,
-    workclass_Self_employed: 0.008377102750028799,
-    "workclass_Without-pay": 8.94450124841307e-10,
+    "education_Assoc-acdm": 0.1597737770529569,
+    "education_Assoc-voc": 0.19128174958407154,
+    "education_Bachelors": 0.7462951597765248,
+    "education_Doctorate": 2.0134786742912394,
+    "education_HS-grad": 0.4500389007750243,
+    "education_Masters": 0.7863731050393168,
+    "education_Prof-school": 1.5809944103532312,
+    "hours.per.week": 0.36698867089908305,
+    "marital.status_Married": 0.15877873348005986,
+    "marital.status_Never-married": 1.3715492475465174,
+    "marital.status_Separated": 0.3690434340777071,
+    "marital.status_Widowed": 0.04814700454582399,
+    "occupation_Adm-clerical": 0.6235480910553595,
+    "occupation_Armed-Forces": 0.04955807356982138,
+    "occupation_Craft-repair": 0.5913188816072259,
+    "occupation_Exec-managerial": 1.5945251215328997,
+    "occupation_Farming-fishing": 0.40237918097773856,
+    "occupation_Handlers-cleaners": 0.07060778732293722,
+    "occupation_Machine-op-inspct": 0.25492295965332495,
+    "occupation_Priv-house-serv": 0.35067384642876376,
+    "occupation_Prof-specialty": 1.1249486651419687,
+    "occupation_Protective-serv": 1.0934215522618733,
+    "occupation_Sales": 0.8300755818351907,
+    "occupation_Tech-support": 1.2907093240873515,
+    "occupation_Transport-moving": 0.4317769300603967,
+    "race_Amer-Indian-Eskimo": 0.47085595605458225,
+    "race_Asian-Pac-Islander": 0.09637343991687164,
+    "race_Other": 1.3112574804801014,
+    "race_White": 0.18091819753956256,
+    "relationship_Husband": 0.6503066114975814,
+    "relationship_Not-in-family": 0.37071525939117933,
+    "relationship_Other-relative": 1.0367735626172885,
+    "relationship_Own-child": 1.6774806817516916,
+    "relationship_Unmarried": 0.7738804636791998,
+    "relationship_Wife": 1.6748764123430155,
+    "sex_Female": 0.747338147407988,
+    "workclass_Govt_employees": 0.30947828342776457,
+    "workclass_Never-worked": 0.021893723006955586,
+    "workclass_Private": 0.5845724356550565,
+    "workclass_Self_employed": 0.6082024980955162,
+    "workclass_Without-pay": 0.009520003413324866
   },
   status: "success",
 }
@@ -77,7 +77,7 @@ export default function FeatureImportanceDemo() {
           <p className="text-orange-700">Visualization of the most important features of your ML model</p>
         </div>
 
-        <FeatureImportanceChart
+        <FeatureImportanceChartLR
           data={sampleData}
         // data={data}
           title="Importance des Features - Modèle de Prédiction de Revenus"
