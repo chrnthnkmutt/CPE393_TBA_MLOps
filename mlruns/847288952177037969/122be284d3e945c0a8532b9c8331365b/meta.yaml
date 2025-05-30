@@ -1,0 +1,15 @@
+artifact_uri: file:///home/talleyrand/Documents/MLOps/CPE393_TBA_MLOps/mlruns/847288952177037969/122be284d3e945c0a8532b9c8331365b/artifacts
+end_time: 1748564491251
+entry_point_name: ''
+experiment_id: '847288952177037969'
+lifecycle_stage: active
+run_id: 122be284d3e945c0a8532b9c8331365b
+run_name: LightGBM
+run_uuid: 122be284d3e945c0a8532b9c8331365b
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1748564489625
+status: 3
+tags: []
+user_id: talleyrand

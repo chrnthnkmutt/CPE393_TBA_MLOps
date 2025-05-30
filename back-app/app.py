@@ -174,6 +174,21 @@ def transform_payload_to_vector(data: dict) -> dict:
 
 
 
+# @app.route("/api/predict", methods=["POST"])
+# def predict():
+#     logger.info("Prediction request received")
+#     data = request.get_json()
+
+#     input_vector = transform_payload_to_vector(data)
+#     df = pd.DataFrame([input_vector])
+
+#     prediction = model.predict(df)[0]
+    
+     
+#     label = ">50K" if prediction else "<=50K"
+#     logger.info(f"Prediction completed: {label}")
+#     return jsonify({"prediction": label})
+
 @app.route("/api/predict", methods=["POST"])
 def predict():
     logger.info("Prediction request received")
@@ -182,10 +197,14 @@ def predict():
     input_vector = transform_payload_to_vector(data)
     df = pd.DataFrame([input_vector])
 
-    prediction = model.predict(df)[0]
+    y_proba = model.predict_proba(df)[0][1] 
+    threshold = 0.60 
+    prediction = 1 if y_proba > threshold else 0
+
     label = ">50K" if prediction else "<=50K"
-    logger.info(f"Prediction completed: {label}")
-    return jsonify({"prediction": label})
+    logger.info(f"Prediction completed: {label} (Proba: {y_proba:.4f})")
+    return jsonify({"prediction": label, "probability": round(y_proba, 4)})
+
 
 
 @app.route("/api/predict_proba", methods=["POST"])
@@ -209,14 +228,15 @@ def predict_no_mapping():
     logger.info("Prediction request received")
     data = request.get_json()
 
-    
     input_vector = {name: data.get(name, 0) for name in feature_names}
     df = pd.DataFrame([input_vector])
 
-    prediction = model.predict(df)[0]
+    y_proba = model.predict_proba(df)[0][1] 
+    prediction = int(y_proba > 0.60) 
     label = ">50K" if prediction else "<=50K"
-    logger.info(f"Prediction completed: {label}")
-    return jsonify({"prediction": label})
+
+    logger.info(f"Prediction completed: {label} (proba: {y_proba:.4f})")
+    return jsonify({"prediction": label, "probability": round(y_proba, 4)})
 
 
 @app.route("/api/predict_proba_no_mapping", methods=["POST"])

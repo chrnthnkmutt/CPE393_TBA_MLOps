@@ -1,0 +1,15 @@
+artifact_uri: file:///home/talleyrand/Documents/MLOps/CPE393_TBA_MLOps/mlruns/847288952177037969/d4aa49393a9c47c584083303d33e598e/artifacts
+end_time: 1748558847654
+entry_point_name: ''
+experiment_id: '847288952177037969'
+lifecycle_stage: active
+run_id: d4aa49393a9c47c584083303d33e598e
+run_name: GBM
+run_uuid: d4aa49393a9c47c584083303d33e598e
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1748558845810
+status: 3
+tags: []
+user_id: talleyrand
