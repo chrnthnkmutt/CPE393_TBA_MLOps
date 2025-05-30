@@ -1,5 +1,4 @@
 import os
-import warnings
 from datetime import datetime
 
 import mlflow
@@ -22,6 +21,7 @@ from sklearn.preprocessing import (
 )
 import category_encoders as ce
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 # ─── 1. MLflow setup ──────────────────────────────────────────────────────────
 load_dotenv(os.path.join(os.path.dirname(__file__), "../.env"))
@@ -30,6 +30,8 @@ mlflow.set_experiment("Adult_LightGBM_Pipeline")
 
 # ─── 2. Chargement et nettoyage de base ──────────────────────────────────────
 raw = pd.read_csv("data/adult.csv")
+raw = raw.drop(columns=["fnlwgt"])
+
 
 # remplacer les '?' par la modalité la plus fréquente
 for col in ["workclass", "occupation", "native.country"]:
@@ -62,9 +64,9 @@ def add_custom_features(df: pd.DataFrame) -> pd.DataFrame:
 def build_feature_pipeline():
     # colonnes originales
     num_feats      = ["age", "hours.per.week", "education.num",
-                      "capital.gain", "capital.loss", "fnlwgt"]
+                    "capital.gain", "capital.loss"]
     cat_onehot     = ["workclass", "education", "marital.status",
-                      "relationship", "race", "sex", "age_bin"]
+                    "relationship", "race", "sex", "age_bin"]
     cat_target_enc = ["occupation", "native.country"]
     flag_feats     = ["has_cap_gain", "has_cap_loss"]
     ratio_feats    = ["gain_loss_ratio", "work_rate"]
@@ -97,6 +99,11 @@ def build_feature_pipeline():
         cols=cat_target_enc,
         smoothing=0.3
     )
+    
+    missing_cols = [col for col in num_feats if col not in raw.columns]
+    if missing_cols:
+        raise ValueError(f"Missing columns in the dataset : {missing_cols}")
+
 
     preprocessor = ColumnTransformer([
         ("num",    num_pipeline,      num_feats + ratio_feats + flag_feats),
@@ -123,8 +130,35 @@ pipeline = ImbPipeline([
     ("clf",         model),
 ])
 
+# ─── 6. Form options ─────────────────────────────────────────────────────
 
-# ─── 6. Split train/test ─────────────────────────────────────────────────────
+# juste après le nettoyage de raw, par exemple avant le train_test_split
+categorical_inputs = [
+    "workclass",
+    "education",
+    "marital.status",
+    "occupation",
+    "relationship",
+    "race",
+    "sex",
+    "native.country"
+]
+
+options = {}
+for col in categorical_inputs:
+    # tri pour l’UI
+    opts = sorted(raw[col].unique().tolist())
+    options[col] = opts
+
+# affiche ou sauve en JSON pour ton front
+import json
+print(json.dumps(options, indent=2, ensure_ascii=False))
+with open("models/form_options.json", "w") as f:
+    json.dump(options, f, indent=2, ensure_ascii=False)
+
+
+
+# ─── 7. Split train/test ─────────────────────────────────────────────────────
 X = raw.drop(columns=["income", "target"])
 y = raw["target"]
 X_train, X_test, y_train, y_test = train_test_split(
@@ -135,7 +169,7 @@ X_tr, X_val, y_tr, y_val = train_test_split(X_train, y_train, test_size=0.2, str
 
 
 
-# ─── 7. Training + logging MLflow ────────────────────────────────────────
+# ─── 8. Training + logging MLflow ────────────────────────────────────────
 with mlflow.start_run(run_name="LightGBM_with_advanced_features"):
     pipeline.fit(X_tr, y_tr)
     
@@ -243,6 +277,16 @@ with mlflow.start_run(run_name="LightGBM_with_advanced_features"):
 
     
     print(f"FinalMetrics: Accuracy: {acc}, Precision: {prec}, Recall: {rec}, F1: {f1}, AUC: {auc}")
+    
+    conf_matrix = confusion_matrix(y_test, y_test_pred)
+    plt.figure(figsize=(8,5))
+    sns.heatmap(conf_matrix, annot=True, fmt="d", cmap="Blues", cbar=False)
+    plt.title("Confusion Matrix")
+    plt.xlabel("Prediction")
+    plt.ylabel("True")
+    plt.tight_layout()
+    plt.savefig("models/confusion_matrix.png")
+    mlflow.log_artifact("models/confusion_matrix.png")
 
     # tracer & enregistrer la courbe
     plt.figure(figsize=(8,5))
@@ -251,8 +295,8 @@ with mlflow.start_run(run_name="LightGBM_with_advanced_features"):
     plt.plot(thresholds, recs,  label="Recall")
     plt.axvline(best_t, color="gray", linestyle="--", label=f"Threshold={best_t:.2f}")
     plt.scatter(best_t, f1s[best_idx], color='red', label=f"F1 max={f1s[best_idx]:.2f}")
-    plt.title("Seuil décision LightGBM")
-    plt.xlabel("Seuil de décision")
+    plt.title("LightGBM Threshold")
+    plt.xlabel("Threshold")
     plt.ylabel("Score")
     plt.legend()
     plt.tight_layout()
