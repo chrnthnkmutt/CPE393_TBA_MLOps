@@ -9,7 +9,9 @@ import pandas as pd
 from dotenv import load_dotenv
 from imblearn.over_sampling import SMOTE
 from imblearn.pipeline import Pipeline as ImbPipeline
-from lightgbm import LGBMClassifier
+import lightgbm as lgb
+
+# from lightgbm import LGBMClassifier
 from sklearn.compose import ColumnTransformer
 from sklearn.metrics import (
     accuracy_score, precision_score, recall_score,
@@ -109,8 +111,9 @@ def build_feature_pipeline():
 
 # ─── 5. Construction du pipeline complet ─────────────────────────────────────
 preprocessor = build_feature_pipeline()
-model = LGBMClassifier(
+model = lgb.LGBMClassifier(
     class_weight="balanced",
+    device="gpu",              
     random_state=42,
     n_estimators=200,
     learning_rate=0.05,
@@ -131,118 +134,83 @@ X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, stratify=y, random_state=42
 )
 
-X_tr, X_val, y_tr, y_val = train_test_split(X_train, y_train, test_size=0.2, stratify=y_train, random_state=42)
+# ─── 7. Hyper-param search + éval final ─────────────────────────────────────
+from sklearn.model_selection import StratifiedKFold, GridSearchCV
 
+# 1) grille à tester
+param_grid = {
+    "clf__n_estimators":   [100, 200, 500],
+    "clf__learning_rate":  [0.01, 0.05, 0.1],
+    "clf__num_leaves":     [31, 63, 127],
+    "clf__max_depth":      [-1, 10, 20],
+    "clf__subsample":      [0.7, 1.0],
+    "clf__colsample_bytree":[0.7, 1.0],
+}
 
+# 2) validation croisée
+cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 
-# ─── 7. Training + logging MLflow ────────────────────────────────────────
+# 3) GridSearchCV sur votre pipeline
+search = GridSearchCV(
+    estimator=pipeline,
+    param_grid=param_grid,
+    cv=cv,
+    scoring="f1",      # ou "roc_auc" selon votre critère métier
+    n_jobs=-1,
+    verbose=2
+)
+
+# ─── 8. Entraînement + logging MLflow ────────────────────────────────────────
 with mlflow.start_run(run_name="LightGBM_with_advanced_features"):
-    pipeline.fit(X_tr, y_tr)
+    # pipeline.fit(X_train, y_train)
+    search.fit(X_train, y_train)
+
+    # prédictions / proba
     
-    lgbm_model = pipeline.named_steps["clf"]
-    if hasattr(lgbm_model, "feature_importances_"):
-        feature_names = []
-        for name, trans, cols in pipeline.named_steps["preproc"].transformers_:
-            if name == "num":
-                feature_names.extend(cols)
-            elif name == "onehot":
-                encoder = pipeline.named_steps["preproc"].named_transformers_["onehot"]
-                try:
-                    feature_names.extend(encoder.get_feature_names_out(cols))
-                except:
-                    print(f"Error getting feature names for {cols}")
-                    feature_names.extend(cols)
-            elif name == "targ":
-                feature_names.extend(cols)
-        
-        importances = dict(zip(feature_names, lgbm_model.feature_importances_))
-        importances_sorted = dict(sorted(importances.items(), key=lambda x: x[1], reverse=True))
-        
-        # Afficher toutes les features et leurs importances
-        print("\nToutes les features et leurs importances:")
-        for feature, importance in importances_sorted.items():
-            print(f"{feature}: {importance:.2f}")
-        
-        # log CSV
-        imp_df = pd.DataFrame(importances_sorted.items(), columns=["feature", "importance"])
-        imp_df.to_csv("models/feature_importances.csv", index=False)
-        mlflow.log_artifact("models/feature_importances.csv")
+    # y_pred  = pipeline.predict(X_test)
+    # y_proba = pipeline.predict_proba(X_test)[:, 1]
+    best_pipeline = search.best_estimator_
+    y_pred  = best_pipeline.predict(X_test)
+    y_proba = best_pipeline.predict_proba(X_test)[:, 1]
 
-        # transformer les importances en pourcentage
-        imp_df["percentage"] = 100 * imp_df["importance"] / imp_df["importance"].sum()
-        
-        topn = 20  # top 20 features
-        plt.figure(figsize=(10,6))
-        plt.barh(imp_df["feature"][:topn], imp_df["percentage"][:topn])
-        plt.xlabel("Importance (%)")
-        plt.title(f"Top {topn} features - LightGBM")
-        plt.gca().invert_yaxis()
-        plt.tight_layout()
-        plt.savefig("models/feature_importance_plot.png")
-        mlflow.log_artifact("models/feature_importance_plot.png")
-        
-    # 1) Prépare ton input_example en float
-    X_input_example = X_test.head(1).copy()
-    X_input_example = X_input_example.astype({
-        col: 'float' for col in X_input_example.select_dtypes('int').columns
-    })
+    # calcul des métriques
+    acc  = accuracy_score(y_test, y_pred)
+    prec = precision_score(y_test, y_pred)
+    rec  = recall_score(y_test, y_pred)
+    f1   = f1_score(y_test, y_pred)
+    auc  = roc_auc_score(y_test, y_proba)
     
-    print(X_input_example.columns.tolist())
-    X_input_example.head(1).to_json("models/example_input.json", orient="records", lines=False)
+    print(f"Best params: {search.best_params_}")
+    print(f"Best score: {search.best_score_}")  
+    print(f"Metrics: Accuracy: {acc}, Precision: {prec}, Recall: {rec}, F1: {f1}, AUC: {auc}")
 
+    # log metrics & modèle
+    mlflow.log_metric("accuracy",  acc)
+    mlflow.log_metric("precision", prec)
+    mlflow.log_metric("recall",    rec)
+    mlflow.log_metric("f1_score",  f1)
+    mlflow.log_metric("auc",       auc)
+    # mlflow.sklearn.log_model(pipeline, "lightgbm_pipeline")
+    mlflow.sklearn.log_model(best_pipeline, "lightgbm_pipeline")
 
-    # 2) Infère la signature à partir de ce même exemple
-    signature = mlflow.models.infer_signature(
-        X_input_example,
-        pipeline.predict_proba(X_input_example)
-    )
-
-    # 3) Log le modèle avec input_example + signature "propres"
-    mlflow.sklearn.log_model(
-        sk_model=pipeline,
-        artifact_path="lightgbm_pipeline",
-        input_example=X_input_example,
-        signature=signature
-    )
 
     # log hyper‐params
-    mlflow.log_param("n_estimators",   model.n_estimators)
-    mlflow.log_param("learning_rate",  model.learning_rate)
-    mlflow.log_param("num_leaves",     model.num_leaves)
-    
-    y_val_proba = pipeline.predict_proba(X_val)[:, 1]
+    mlflow.log_param("n_estimators",   best_pipeline.n_estimators)
+    mlflow.log_param("learning_rate",  best_pipeline.learning_rate)
+    mlflow.log_param("num_leaves",     best_pipeline.num_leaves)
 
     # ── 8. Analyse de seuil ─────────────────────────────────────────────
     thresholds = np.linspace(0.1, 0.9, 17)
     f1s, precs, recs = [], [], []
     for t in thresholds:
-        y_val_pred_t = (y_val_proba > t).astype(int)
-        f1s.append(f1_score(y_val, y_val_pred_t))
-        precs.append(precision_score(y_val, y_val_pred_t))
-        recs.append(recall_score(y_val, y_val_pred_t))
+        y_pred_t = (y_proba > t).astype(int)
+        f1s.append(f1_score(y_test, y_pred_t))
+        precs.append(precision_score(y_test, y_pred_t))
+        recs.append(recall_score(y_test, y_pred_t))
 
     best_idx = int(np.argmax(f1s))
     best_t   = float(thresholds[best_idx])
     mlflow.log_metric("best_threshold", best_t)
-    
-    y_test_proba = pipeline.predict_proba(X_test)[:, 1]
-    y_test_pred  = (y_test_proba > best_t).astype(int)
-
-    # calcul des métriques
-    acc  = accuracy_score(y_test, y_test_pred)
-    prec = precision_score(y_test, y_test_pred)
-    rec  = recall_score(y_test, y_test_pred)
-    f1   = f1_score(y_test, y_test_pred)
-    auc  = roc_auc_score(y_test, y_test_proba)
-    
-    mlflow.log_metric("final_accuracy", acc)
-    mlflow.log_metric("final_precision", prec)
-    mlflow.log_metric("final_recall", rec)
-    mlflow.log_metric("final_auc", auc)
-    mlflow.log_metric("f1_score_best_thresh", f1)
-
-    
-    print(f"FinalMetrics: Accuracy: {acc}, Precision: {prec}, Recall: {rec}, F1: {f1}, AUC: {auc}")
 
     # tracer & enregistrer la courbe
     plt.figure(figsize=(8,5))
@@ -250,7 +218,6 @@ with mlflow.start_run(run_name="LightGBM_with_advanced_features"):
     plt.plot(thresholds, precs, label="Precision")
     plt.plot(thresholds, recs,  label="Recall")
     plt.axvline(best_t, color="gray", linestyle="--", label=f"Threshold={best_t:.2f}")
-    plt.scatter(best_t, f1s[best_idx], color='red', label=f"F1 max={f1s[best_idx]:.2f}")
     plt.title("Seuil décision LightGBM")
     plt.xlabel("Seuil de décision")
     plt.ylabel("Score")
@@ -260,4 +227,4 @@ with mlflow.start_run(run_name="LightGBM_with_advanced_features"):
     plt.savefig("models/LightGBM_threshold.png")
     mlflow.log_artifact("models/LightGBM_threshold.png")
 
-print("Training completed, artefacts available in mlruns.")
+print("✅ Entraînement terminé, artefacts disponibles dans mlruns/ …")

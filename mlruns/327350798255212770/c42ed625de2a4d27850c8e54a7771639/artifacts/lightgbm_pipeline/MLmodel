@@ -1,0 +1,39 @@
+artifact_path: lightgbm_pipeline
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.pkl
+    predict_fn: predict
+    python_version: 3.11.11
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: cloudpickle
+    sklearn_version: 1.6.1
+mlflow_version: 2.18.0
+model_size_bytes: 3124035
+model_uuid: 4bcf514f3a6340c0967ea167e5c660b3
+run_id: c42ed625de2a4d27850c8e54a7771639
+saved_input_example_info:
+  artifact_path: input_example.json
+  pandas_orient: split
+  serving_input_path: serving_input_example.json
+  type: dataframe
+signature:
+  inputs: '[{"type": "long", "name": "age", "required": true}, {"type": "string",
+    "name": "workclass", "required": true}, {"type": "long", "name": "fnlwgt", "required":
+    true}, {"type": "string", "name": "education", "required": true}, {"type": "long",
+    "name": "education.num", "required": true}, {"type": "string", "name": "marital.status",
+    "required": true}, {"type": "string", "name": "occupation", "required": true},
+    {"type": "string", "name": "relationship", "required": true}, {"type": "string",
+    "name": "race", "required": true}, {"type": "string", "name": "sex", "required":
+    true}, {"type": "long", "name": "capital.gain", "required": true}, {"type": "long",
+    "name": "capital.loss", "required": true}, {"type": "long", "name": "hours.per.week",
+    "required": true}, {"type": "string", "name": "native.country", "required": true}]'
+  outputs: '[{"type": "tensor", "tensor-spec": {"dtype": "float64", "shape": [-1,
+    2]}}]'
+  params: null
+utc_time_created: '2025-05-30 09:36:11.741147'

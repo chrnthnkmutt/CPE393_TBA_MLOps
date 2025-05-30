@@ -1,0 +1,38 @@
+{
+  "dataframe_split": {
+    "columns": [
+      "age",
+      "workclass",
+      "fnlwgt",
+      "education",
+      "education.num",
+      "marital.status",
+      "occupation",
+      "relationship",
+      "race",
+      "sex",
+      "capital.gain",
+      "capital.loss",
+      "hours.per.week",
+      "native.country"
+    ],
+    "data": [
+      [
+        28.0,
+        "Self-emp-not-inc",
+        204984.0,
+        "Bachelors",
+        13.0,
+        "Never-married",
+        "Tech-support",
+        "Not-in-family",
+        "White",
+        "Male",
+        0.0,
+        0.0,
+        45.0,
+        "United-States"
+      ]
+    ]
+  }
+}
