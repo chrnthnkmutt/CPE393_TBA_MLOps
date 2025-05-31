@@ -1,26 +1,16 @@
 services:
-#   frontend:
-#     build:
-#       context: ./front-app
-#       dockerfile: Dockerfile
-#     ports:
-#       - "3000:3000"
-#     environment:
-#       - NEXT_PUBLIC_API_URL=http://backend:5000
-#     depends_on:
-#       - backend
 
   frontend:
     container_name: frontend
     build:
       context: ./frontend
+      # dockerfile: Dockerfile.prod
       dockerfile: Dockerfile.dev
-    # Set environment variables directly in the compose file
+
     environment:
       NODE_ENV: development
       ENV_VARIABLE: ${ENV_VARIABLE}
       NEXT_PUBLIC_ENV_VARIABLE: ${NEXT_PUBLIC_ENV_VARIABLE}
-    # Set environment variables based on the .env file
     env_file:
       - .env
     volumes:
@@ -31,13 +21,6 @@ services:
       - 3000:3000
     networks:
       - app-network
-#   nginx:
-#     image: nginx:latest
-#     ports:
-#       - 80:80
-#     networks:
-#       - network
-#     restart: always
 
   backend:
     build:
@@ -52,6 +35,14 @@ services:
       - FLASK_APP=app.py
     networks:
       - app-network
+
+    #   nginx:
+#     image: nginx:latest
+#     ports:
+#       - 80:80
+#     networks:
+#       - network
+#     restart: always
 
 networks:
   app-network:

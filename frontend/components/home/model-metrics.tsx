@@ -1,5 +1,4 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Info, Target, LineChart, BarChart, TrendingUp, Activity, AlertCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -111,12 +110,3 @@ export function ModelMetrics({ metrics, isLoading, error }: ModelMetricsProps) {
         </Card>
     )
 }
-
-// {
-//     "accuracy": 0.7961099932930918,
-//     "auc": 0.6713371739959909,
-//     "f1_score": 0.8728033472803347,
-//     "precision": 0.8577302631578947,
-//     "recall": 0.8884156729131175
-// }
-
