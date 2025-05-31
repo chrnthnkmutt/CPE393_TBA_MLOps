@@ -1,0 +1,230 @@
+[
+  {
+    "feature": "age",
+    "percentage": 19.905115511551156
+  },
+  {
+    "feature": "hours.per.week",
+    "percentage": 9.467821782178218
+  },
+  {
+    "feature": "capital.gain",
+    "percentage": 7.920792079207921
+  },
+  {
+    "feature": "work_rate",
+    "percentage": 6.7450495049504955
+  },
+  {
+    "feature": "workclass_Federal-gov",
+    "percentage": 6.7037953795379535
+  },
+  {
+    "feature": "capital.loss",
+    "percentage": 5.0948844884488445
+  },
+  {
+    "feature": "workclass_Local-gov",
+    "percentage": 4.476072607260726
+  },
+  {
+    "feature": "education.num",
+    "percentage": 3.424092409240924
+  },
+  {
+    "feature": "gain_loss_ratio",
+    "percentage": 3.320957095709571
+  },
+  {
+    "feature": "marital.status_Never-married",
+    "percentage": 2.7846534653465347
+  },
+  {
+    "feature": "age_bin_senior",
+    "percentage": 2.557755775577558
+  },
+  {
+    "feature": "workclass_Self-emp-not-inc",
+    "percentage": 2.0008250825082508
+  },
+  {
+    "feature": "workclass_Without-pay",
+    "percentage": 1.9595709570957096
+  },
+  {
+    "feature": "age_bin_mid",
+    "percentage": 1.8358085808580857
+  },
+  {
+    "feature": "workclass_Never-worked",
+    "percentage": 1.4232673267326732
+  },
+  {
+    "feature": "relationship_Own-child",
+    "percentage": 1.3613861386138615
+  },
+  {
+    "feature": "education_10th",
+    "percentage": 1.3201320132013201
+  },
+  {
+    "feature": "race_Asian-Pac-Islander",
+    "percentage": 1.2995049504950495
+  },
+  {
+    "feature": "workclass_State-gov",
+    "percentage": 1.2582508250825082
+  },
+  {
+    "feature": "workclass_Private",
+    "percentage": 1.2376237623762376
+  },
+  {
+    "feature": "marital.status_Widowed",
+    "percentage": 1.0726072607260726
+  },
+  {
+    "feature": "relationship_Wife",
+    "percentage": 1.051980198019802
+  },
+  {
+    "feature": "marital.status_Married-AF-spouse",
+    "percentage": 0.9075907590759076
+  },
+  {
+    "feature": "relationship_Not-in-family",
+    "percentage": 0.8044554455445545
+  },
+  {
+    "feature": "relationship_Unmarried",
+    "percentage": 0.7425742574257426
+  },
+  {
+    "feature": "education_Preschool",
+    "percentage": 0.6806930693069307
+  },
+  {
+    "feature": "marital.status_Divorced",
+    "percentage": 0.6806930693069307
+  },
+  {
+    "feature": "marital.status_Married-civ-spouse",
+    "percentage": 0.6394389438943895
+  },
+  {
+    "feature": "relationship_Other-relative",
+    "percentage": 0.6394389438943895
+  },
+  {
+    "feature": "education_HS-grad",
+    "percentage": 0.6188118811881188
+  },
+  {
+    "feature": "education_Bachelors",
+    "percentage": 0.5981848184818482
+  },
+  {
+    "feature": "education_Prof-school",
+    "percentage": 0.5363036303630363
+  },
+  {
+    "feature": "race_White",
+    "percentage": 0.5363036303630363
+  },
+  {
+    "feature": "relationship_Husband",
+    "percentage": 0.49504950495049505
+  },
+  {
+    "feature": "education_12th",
+    "percentage": 0.43316831683168316
+  },
+  {
+    "feature": "race_Amer-Indian-Eskimo",
+    "percentage": 0.43316831683168316
+  },
+  {
+    "feature": "race_Black",
+    "percentage": 0.3712871287128713
+  },
+  {
+    "feature": "age_bin_young",
+    "percentage": 0.3712871287128713
+  },
+  {
+    "feature": "education_1st-4th",
+    "percentage": 0.33003300330033003
+  },
+  {
+    "feature": "race_Other",
+    "percentage": 0.24752475247524752
+  },
+  {
+    "feature": "occupation",
+    "percentage": 0.2268976897689769
+  },
+  {
+    "feature": "native.country",
+    "percentage": 0.2268976897689769
+  },
+  {
+    "feature": "education_Assoc-acdm",
+    "percentage": 0.20627062706270627
+  },
+  {
+    "feature": "marital.status_Separated",
+    "percentage": 0.20627062706270627
+  },
+  {
+    "feature": "education_Masters",
+    "percentage": 0.18564356435643564
+  },
+  {
+    "feature": "education_5th-6th",
+    "percentage": 0.16501650165016502
+  },
+  {
+    "feature": "sex_Male",
+    "percentage": 0.1443894389438944
+  },
+  {
+    "feature": "marital.status_Married-spouse-absent",
+    "percentage": 0.12376237623762376
+  },
+  {
+    "feature": "education_9th",
+    "percentage": 0.10313531353135313
+  },
+  {
+    "feature": "education_Doctorate",
+    "percentage": 0.06188118811881188
+  },
+  {
+    "feature": "education_7th-8th",
+    "percentage": 0.041254125412541254
+  },
+  {
+    "feature": "education_Assoc-voc",
+    "percentage": 0.020627062706270627
+  },
+  {
+    "feature": "has_cap_gain",
+    "percentage": 0.0
+  },
+  {
+    "feature": "has_cap_loss",
+    "percentage": 0.0
+  },
+  {
+    "feature": "workclass_Self-emp-inc",
+    "percentage": 0.0
+  },
+  {
+    "feature": "education_11th",
+    "percentage": 0.0
+  },
+  {
+    "feature": "education_Some-college",
+    "percentage": 0.0
+  }
+]

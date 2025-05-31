@@ -21,9 +21,11 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 LIGHTGBM_model_path = os.path.join(BASE_DIR, "production_models", "lightgbm_pipeline.pkl")
 
+
 MODEL_PATH = LIGHTGBM_model_path
 
 FEATURES_PATH = os.path.join(BASE_DIR, "features.json")
+FEATURE_IMPORTANCES_PATH = os.path.join(BASE_DIR, "feature_importances_percentage.json")
 
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
@@ -31,6 +33,11 @@ CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
 
 with open(MODEL_PATH, 'rb') as f:
     model = pickle.load(f)
+    
+
+with open(FEATURE_IMPORTANCES_PATH) as f:
+    feature_importances = json.load(f)
+    feature_importances_names = [f["feature"] for f in feature_importances]
 
 
 with open(FEATURES_PATH) as f:
@@ -63,14 +70,6 @@ def health():
             logger.error("Features file not found")
             return jsonify({"status": "error", "message": "Features file not found"}), 500
             
-        # Check if model can make a basic prediction
-        test_input = {name: 0 for name in feature_names}
-        df = pd.DataFrame([test_input])
-        try:
-            model.predict(df)
-        except Exception as e:
-            logger.error(f"Model prediction failed during health check: {str(e)}")
-            return jsonify({"status": "error", "message": f"Model prediction failed: {str(e)}"}), 500
             
         logger.info("Health check completed successfully")
         return jsonify({
@@ -127,6 +126,10 @@ education_map = {
     "Doctorate": 16
 }
 
+
+
+
+
 @app.route("/api/predict", methods=["POST"])
 def predict():
     logger.info("Prediction request received")
@@ -141,6 +144,26 @@ def predict():
         if data["education"] not in education_map:
             return jsonify({"error": f"Unknown education level: {data['education']}"}), 400
         data["education.num"] = education_map[data["education"]]
+        
+        column_map= {
+            "age": "age",
+            "workclass": "workclass",
+            "education": "education",
+            "education.num": "education.num",
+            "marital_status": "marital.status",
+            "occupation": "occupation",
+            "relationship": "relationship",
+            "race": "race",
+            "sex": "sex",
+            "capital_gain": "capital.gain",
+            "capital_loss": "capital.loss",
+            "hours_per_week": "hours.per.week",
+            "native_country": "native.country",
+        }
+        
+        data = {column_map.get(k, k): v for k, v in data.items()}
+
+        print(data)
 
         # Construction DataFrame + features custom
         df = pd.DataFrame([data])
@@ -216,21 +239,13 @@ def explain():
                 "message": "Model not loaded"
             }), 500
 
-        if not hasattr(model, "coef_"):
-            logger.error("Model does not provide coefficients for explanation")
-            return jsonify({
-                "status": "error",
-                "message": "This model does not provide feature coefficients"
-            }), 400
-
-        import numpy as np
-        importances = dict(zip(feature_names, np.abs(model.coef_[0])))
-        sorted_importances = dict(sorted(importances.items(), key=lambda x: x[1], reverse=True))
+        # N = int(request.args.get("top", 20))
+        # top_features = sorted(feature_importances, key=lambda f: f["percentage"], reverse=True)[:N]
 
         logger.info("Model explanation completed successfully")
         return jsonify({
             "status": "success",
-            "data": sorted_importances
+            "data": feature_importances
         })
 
     except Exception as e:
@@ -243,7 +258,7 @@ def explain():
 
 @app.route("/api/metrics", methods=["GET"])
 def metrics():
-    METRICS_PATH = os.path.join(BASE_DIR, "metrics.json")
+    METRICS_PATH = os.path.join(BASE_DIR, "GBM_metrics.json")
 
     try:
         logger.info("Metrics request received")

@@ -28,77 +28,112 @@ const formSchema = z.object({
   capital_loss: z.number().min(0).max(4356),
   hours_per_week: z.number().min(1).max(99),
 
-  education_level: z
+  workclass: z
     .enum([
-      "education_assoc_acdm",
-      "education_assoc_voc",
-      "education_bachelors",
-      "education_doctorate",
-      "education_hs_grad",
-      "education_masters",
-      "education_prof_school",
-    ])
-    .optional(),
+      "Federal-gov",
+      "Local-gov", 
+      "Never-worked",
+      "Private",
+      "Self-emp-inc",
+      "Self-emp-not-inc",
+      "State-gov",
+      "Without-pay"
+    ]),
+
+  education: z
+    .enum([
+      "Preschool",
+      "1st-4th",
+      "5th-6th", 
+      "7th-8th",
+      "9th",
+      "10th",
+      "11th",
+      "12th",
+      "HS-grad",
+      "Some-college",
+      "Assoc-voc",
+      "Assoc-acdm",
+      "Bachelors",
+      "Masters",
+      "Prof-school",
+      "Doctorate"
+    ]),
 
   marital_status: z
     .enum([
-      "marital_status_married",
-      "marital_status_never_married",
-      "marital_status_separated",
-      "marital_status_widowed",
-    ])
-    .optional(),
+      "Divorced",
+      "Married-AF-spouse",
+      "Married-civ-spouse",
+      "Married-spouse-absent",
+      "Never-married",
+      "Separated",
+      "Widowed"
+    ]),
 
   occupation: z
     .enum([
-      "occupation_adm_clerical",
-      "occupation_craft_repair",
-      "occupation_exec_managerial",
-      "occupation_farming_fishing",
-      "occupation_handlers_cleaners",
-      "occupation_machine_op_inspct",
-      "occupation_priv_house_serv",
-      "occupation_prof_specialty",
-      "occupation_protective_serv",
-      "occupation_sales",
-      "occupation_tech_support",
-      "occupation_transport_moving",
-      "occupation_armed_forces",
-    ])
-    .optional(),
-
-  race: z.enum(["race_amer_indian_eskimo", "race_asian_pac_islander", "race_other", "race_white"]).optional(),
+      "Adm-clerical",
+      "Armed-Forces",
+      "Craft-repair",
+      "Exec-managerial",
+      "Farming-fishing",
+      "Handlers-cleaners",
+      "Machine-op-inspct",
+      "Other-service",
+      "Priv-house-serv",
+      "Prof-specialty",
+      "Protective-serv",
+      "Sales",
+      "Tech-support",
+      "Transport-moving"
+    ]),
 
   relationship: z
     .enum([
-      "relationship_husband",
-      "relationship_not_in_family",
-      "relationship_other_relative",
-      "relationship_own_child",
-      "relationship_unmarried",
-      "relationship_wife",
-    ])
-    .optional(),
+      "Husband",
+      "Not-in-family",
+      "Other-relative",
+      "Own-child",
+      "Unmarried",
+      "Wife"
+    ]),
 
-  workclass: z
+  race: z
     .enum([
-      "workclass_govt_employees",
-      "workclass_never_worked",
-      "workclass_private",
-      "workclass_self_employed",
-      "workclass_without_pay",
-    ])
-    .optional(),
+      "Amer-Indian-Eskimo",
+      "Asian-Pac-Islander", 
+      "Black",
+      "Other",
+      "White"
+    ]),
 
-  sex: z.enum(["sex_female", "sex_male"]).optional(),
+  sex: z.enum(["Female", "Male"]),
+
+  native_country: z
+    .enum([
+      "Cambodia", "Canada", "China", "Columbia", "Cuba", "Dominican-Republic",
+      "Ecuador", "El-Salvador", "England", "France", "Germany", "Greece",
+      "Guatemala", "Haiti", "Holand-Netherlands", "Honduras", "Hong", "Hungary",
+      "India", "Iran", "Ireland", "Italy", "Jamaica", "Japan", "Laos", "Mexico",
+      "Nicaragua", "Outlying-US(Guam-USVI-etc)", "Peru", "Philippines", "Poland",
+      "Portugal", "Puerto-Rico", "Scotland", "South", "Taiwan", "Thailand",
+      "Trinadad&Tobago", "United-States", "Vietnam", "Yugoslavia"
+    ]),
 })
 
 type FormSchema = z.infer<typeof formSchema>
 type FormKeys = keyof FormSchema
 
+type PredictionResult = {
+  prediction: string;
+  probabilities: { "0": number; "1": number };
+  probability: number;
+}
+
 export function CompleteAnalysisOrange() {
   const [open, setOpen] = useState(false)
-  const [prediction, setPrediction] = useState<string | null>(null)
+  const [predictionResult, setPredictionResult] = useState<PredictionResult | null>(null)
   const [loading, setLoading] = useState(false)
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -108,13 +143,14 @@ export function CompleteAnalysisOrange() {
       capital_gain: 0,
       capital_loss: 0,
       hours_per_week: 0,
-      education_level: undefined,
+      workclass: undefined,
+      education: undefined,
       marital_status: undefined,
       occupation: undefined,
-      race: undefined,
       relationship: undefined,
-      workclass: undefined,
+      race: undefined,
       sex: undefined,
+      native_country: undefined,
     },
   })
 
@@ -131,7 +167,7 @@ export function CompleteAnalysisOrange() {
       })
       const data = await response.json()
       console.log(data)
-      setPrediction(data.prediction)
+      setPredictionResult(data)
       setOpen(true)
     } catch (error) {
       console.error("Error:", error)
@@ -294,12 +330,13 @@ export function CompleteAnalysisOrange() {
                     <h3 className="text-2xl font-bold text-orange-900">Categorical Features</h3>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    
                     <FormField
                       control={form.control}
-                      name="education_level"
+                      name="workclass"
                       render={({ field }) => (
                         <FormItem className="bg-orange-50 p-4 rounded-lg border border-orange-200">
-                          <FormLabel className="text-orange-900 font-semibold">Education</FormLabel>
+                          <FormLabel className="text-orange-900 font-semibold">Work Class</FormLabel>
                           <FormControl>
                             <RadioGroup
                               onValueChange={field.onChange}
@@ -307,13 +344,14 @@ export function CompleteAnalysisOrange() {
                               className="flex flex-col space-y-2"
                             >
                               {[
-                                { value: "education_assoc_acdm", label: "Associate Degree (Academic)" },
-                                { value: "education_assoc_voc", label: "Associate Degree (Vocational)" },
-                                { value: "education_bachelors", label: "Bachelor's Degree" },
-                                { value: "education_doctorate", label: "Doctorate" },
-                                { value: "education_hs_grad", label: "High School Graduate" },
-                                { value: "education_masters", label: "Master's Degree" },
-                                { value: "education_prof_school", label: "Professional School" },
+                                { value: "Federal-gov", label: "Federal Government" },
+                                { value: "Local-gov", label: "Local Government" },
+                                { value: "Never-worked", label: "Never Worked" },
+                                { value: "Private", label: "Private Sector" },
+                                { value: "Self-emp-inc", label: "Self Employed (Incorporated)" },
+                                { value: "Self-emp-not-inc", label: "Self Employed (Not Incorporated)" },
+                                { value: "State-gov", label: "State Government" },
+                                { value: "Without-pay", label: "Without Pay" },
                               ].map((option) => (
                                 <FormItem key={option.value} className="flex items-center space-x-3 space-y-0">
                                   <FormControl>
@@ -322,7 +360,54 @@ export function CompleteAnalysisOrange() {
                                       className="border-orange-400 text-orange-600 focus:ring-orange-500"
                                     />
                                   </FormControl>
-                                  <FormLabel className="font-normal text-orange-800">{option.label}</FormLabel>
+                                  <FormLabel className="font-normal text-orange-800 text-sm">{option.label}</FormLabel>
+                                </FormItem>
+                              ))}
+                            </RadioGroup>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="education"
+                      render={({ field }) => (
+                        <FormItem className="bg-orange-50 p-4 rounded-lg border border-orange-200">
+                          <FormLabel className="text-orange-900 font-semibold">Education</FormLabel>
+                          <FormControl>
+                            <RadioGroup
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                              className="flex flex-col space-y-2 max-h-64 overflow-y-auto"
+                            >
+                              {[
+                                { value: "Preschool", label: "Preschool" },
+                                { value: "1st-4th", label: "1st-4th Grade" },
+                                { value: "5th-6th", label: "5th-6th Grade" },
+                                { value: "7th-8th", label: "7th-8th Grade" },
+                                { value: "9th", label: "9th Grade" },
+                                { value: "10th", label: "10th Grade" },
+                                { value: "11th", label: "11th Grade" },
+                                { value: "12th", label: "12th Grade" },
+                                { value: "HS-grad", label: "High School Graduate" },
+                                { value: "Some-college", label: "Some College" },
+                                { value: "Assoc-voc", label: "Associate Degree (Vocational)" },
+                                { value: "Assoc-acdm", label: "Associate Degree (Academic)" },
+                                { value: "Bachelors", label: "Bachelor's Degree" },
+                                { value: "Masters", label: "Master's Degree" },
+                                { value: "Prof-school", label: "Professional School" },
+                                { value: "Doctorate", label: "Doctorate" },
+                              ].map((option) => (
+                                <FormItem key={option.value} className="flex items-center space-x-3 space-y-0">
+                                  <FormControl>
+                                    <RadioGroupItem
+                                      value={option.value}
+                                      className="border-orange-400 text-orange-600 focus:ring-orange-500"
+                                    />
+                                  </FormControl>
+                                  <FormLabel className="font-normal text-orange-800 text-sm">{option.label}</FormLabel>
                                 </FormItem>
                               ))}
                             </RadioGroup>
@@ -345,10 +430,13 @@ export function CompleteAnalysisOrange() {
                               className="flex flex-col space-y-2"
                             >
                               {[
-                                { value: "marital_status_married", label: "Married" },
-                                { value: "marital_status_never_married", label: "Never Married" },
-                                { value: "marital_status_separated", label: "Separated" },
-                                { value: "marital_status_widowed", label: "Widowed" },
+                                { value: "Divorced", label: "Divorced" },
+                                { value: "Married-AF-spouse", label: "Married (Armed Forces Spouse)" },
+                                { value: "Married-civ-spouse", label: "Married (Civilian Spouse)" },
+                                { value: "Married-spouse-absent", label: "Married (Spouse Absent)" },
+                                { value: "Never-married", label: "Never Married" },
+                                { value: "Separated", label: "Separated" },
+                                { value: "Widowed", label: "Widowed" },
                               ].map((option) => (
                                 <FormItem key={option.value} className="flex items-center space-x-3 space-y-0">
                                   <FormControl>
@@ -357,7 +445,7 @@ export function CompleteAnalysisOrange() {
                                       className="border-orange-400 text-orange-600 focus:ring-orange-500"
                                     />
                                   </FormControl>
-                                  <FormLabel className="font-normal text-orange-800">{option.label}</FormLabel>
+                                  <FormLabel className="font-normal text-orange-800 text-sm">{option.label}</FormLabel>
                                 </FormItem>
                               ))}
                             </RadioGroup>
@@ -380,19 +468,20 @@ export function CompleteAnalysisOrange() {
                               className="grid grid-cols-1 gap-2 max-h-64 overflow-y-auto"
                             >
                               {[
-                                { value: "occupation_adm_clerical", label: "Administrative/Clerical" },
-                                { value: "occupation_craft_repair", label: "Craft/Repair" },
-                                { value: "occupation_exec_managerial", label: "Executive/Managerial" },
-                                { value: "occupation_farming_fishing", label: "Farming/Fishing" },
-                                { value: "occupation_handlers_cleaners", label: "Handlers/Cleaners" },
-                                { value: "occupation_machine_op_inspct", label: "Machine Operator/Inspector" },
-                                { value: "occupation_priv_house_serv", label: "Private Household Service" },
-                                { value: "occupation_prof_specialty", label: "Professional Specialty" },
-                                { value: "occupation_protective_serv", label: "Protective Service" },
-                                { value: "occupation_sales", label: "Sales" },
-                                { value: "occupation_tech_support", label: "Technical Support" },
-                                { value: "occupation_transport_moving", label: "Transportation/Moving" },
-                                { value: "occupation_armed_forces", label: "Armed Forces" },
+                                { value: "Adm-clerical", label: "Administrative/Clerical" },
+                                { value: "Armed-Forces", label: "Armed Forces" },
+                                { value: "Craft-repair", label: "Craft/Repair" },
+                                { value: "Exec-managerial", label: "Executive/Managerial" },
+                                { value: "Farming-fishing", label: "Farming/Fishing" },
+                                { value: "Handlers-cleaners", label: "Handlers/Cleaners" },
+                                { value: "Machine-op-inspct", label: "Machine Operator/Inspector" },
+                                { value: "Other-service", label: "Other Service" },
+                                { value: "Priv-house-serv", label: "Private Household Service" },
+                                { value: "Prof-specialty", label: "Professional Specialty" },
+                                { value: "Protective-serv", label: "Protective Service" },
+                                { value: "Sales", label: "Sales" },
+                                { value: "Tech-support", label: "Technical Support" },
+                                { value: "Transport-moving", label: "Transportation/Moving" },
                               ].map((option) => (
                                 <FormItem key={option.value} className="flex items-center space-x-3 space-y-0">
                                   <FormControl>
@@ -402,41 +491,6 @@ export function CompleteAnalysisOrange() {
                                     />
                                   </FormControl>
                                   <FormLabel className="font-normal text-orange-800 text-sm">{option.label}</FormLabel>
-                                </FormItem>
-                              ))}
-                            </RadioGroup>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="race"
-                      render={({ field }) => (
-                        <FormItem className="bg-orange-50 p-4 rounded-lg border border-orange-200">
-                          <FormLabel className="text-orange-900 font-semibold">Race</FormLabel>
-                          <FormControl>
-                            <RadioGroup
-                              onValueChange={field.onChange}
-                              defaultValue={field.value}
-                              className="flex flex-col space-y-2"
-                            >
-                              {[
-                                { value: "race_amer_indian_eskimo", label: "American Indian/Eskimo" },
-                                { value: "race_asian_pac_islander", label: "Asian/Pacific Islander" },
-                                { value: "race_other", label: "Other" },
-                                { value: "race_white", label: "White" },
-                              ].map((option) => (
-                                <FormItem key={option.value} className="flex items-center space-x-3 space-y-0">
-                                  <FormControl>
-                                    <RadioGroupItem
-                                      value={option.value}
-                                      className="border-orange-400 text-orange-600 focus:ring-orange-500"
-                                    />
-                                  </FormControl>
-                                  <FormLabel className="font-normal text-orange-800">{option.label}</FormLabel>
                                 </FormItem>
                               ))}
                             </RadioGroup>
@@ -459,12 +513,12 @@ export function CompleteAnalysisOrange() {
                               className="flex flex-col space-y-2"
                             >
                               {[
-                                { value: "relationship_husband", label: "Husband" },
-                                { value: "relationship_not_in_family", label: "Not in Family" },
-                                { value: "relationship_other_relative", label: "Other Relative" },
-                                { value: "relationship_own_child", label: "Own Child" },
-                                { value: "relationship_unmarried", label: "Unmarried" },
-                                { value: "relationship_wife", label: "Wife" },
+                                { value: "Husband", label: "Husband" },
+                                { value: "Not-in-family", label: "Not in Family" },
+                                { value: "Other-relative", label: "Other Relative" },
+                                { value: "Own-child", label: "Own Child" },
+                                { value: "Unmarried", label: "Unmarried" },
+                                { value: "Wife", label: "Wife" },
                               ].map((option) => (
                                 <FormItem key={option.value} className="flex items-center space-x-3 space-y-0">
                                   <FormControl>
@@ -485,10 +539,10 @@ export function CompleteAnalysisOrange() {
 
                     <FormField
                       control={form.control}
-                      name="workclass"
+                      name="race"
                       render={({ field }) => (
                         <FormItem className="bg-orange-50 p-4 rounded-lg border border-orange-200">
-                          <FormLabel className="text-orange-900 font-semibold">Work Class</FormLabel>
+                          <FormLabel className="text-orange-900 font-semibold">Race</FormLabel>
                           <FormControl>
                             <RadioGroup
                               onValueChange={field.onChange}
@@ -496,11 +550,11 @@ export function CompleteAnalysisOrange() {
                               className="flex flex-col space-y-2"
                             >
                               {[
-                                { value: "workclass_govt_employees", label: "Government Employee" },
-                                { value: "workclass_never_worked", label: "Never Worked" },
-                                { value: "workclass_private", label: "Private Sector" },
-                                { value: "workclass_self_employed", label: "Self Employed" },
-                                { value: "workclass_without_pay", label: "Without Pay" },
+                                { value: "Amer-Indian-Eskimo", label: "American Indian/Eskimo" },
+                                { value: "Asian-Pac-Islander", label: "Asian/Pacific Islander" },
+                                { value: "Black", label: "Black" },
+                                { value: "Other", label: "Other" },
+                                { value: "White", label: "White" },
                               ].map((option) => (
                                 <FormItem key={option.value} className="flex items-center space-x-3 space-y-0">
                                   <FormControl>
@@ -532,8 +586,8 @@ export function CompleteAnalysisOrange() {
                               className="flex flex-col space-y-2"
                             >
                               {[
-                                { value: "sex_female", label: "Female" },
-                                { value: "sex_male", label: "Male" },
+                                { value: "Female", label: "Female" },
+                                { value: "Male", label: "Male" },
                               ].map((option) => (
                                 <FormItem key={option.value} className="flex items-center space-x-3 space-y-0">
                                   <FormControl>
@@ -543,6 +597,44 @@ export function CompleteAnalysisOrange() {
                                     />
                                   </FormControl>
                                   <FormLabel className="font-normal text-orange-800">{option.label}</FormLabel>
+                                </FormItem>
+                              ))}
+                            </RadioGroup>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="native_country"
+                      render={({ field }) => (
+                        <FormItem className="bg-orange-50 p-4 rounded-lg border border-orange-200 md:col-span-2 lg:col-span-1">
+                          <FormLabel className="text-orange-900 font-semibold">Native Country</FormLabel>
+                          <FormControl>
+                            <RadioGroup
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                              className="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto"
+                            >
+                              {[
+                                "Cambodia", "Canada", "China", "Columbia", "Cuba", "Dominican-Republic",
+                                "Ecuador", "El-Salvador", "England", "France", "Germany", "Greece",
+                                "Guatemala", "Haiti", "Holand-Netherlands", "Honduras", "Hong", "Hungary",
+                                "India", "Iran", "Ireland", "Italy", "Jamaica", "Japan", "Laos", "Mexico",
+                                "Nicaragua", "Outlying-US(Guam-USVI-etc)", "Peru", "Philippines", "Poland",
+                                "Portugal", "Puerto-Rico", "Scotland", "South", "Taiwan", "Thailand",
+                                "Trinadad&Tobago", "United-States", "Vietnam", "Yugoslavia"
+                              ].map((country) => (
+                                <FormItem key={country} className="flex items-center space-x-3 space-y-0">
+                                  <FormControl>
+                                    <RadioGroupItem
+                                      value={country}
+                                      className="border-orange-400 text-orange-600 focus:ring-orange-500"
+                                    />
+                                  </FormControl>
+                                  <FormLabel className="font-normal text-orange-800 text-xs">{country}</FormLabel>
                                 </FormItem>
                               ))}
                             </RadioGroup>
@@ -578,7 +670,7 @@ export function CompleteAnalysisOrange() {
               <AlertDialogContent className="border-orange-200">
                 <AlertDialogHeader>
                   <AlertDialogTitle className="text-orange-900 flex items-center space-x-2">
-                    {prediction === ">50K" ? (
+                    {predictionResult && predictionResult.prediction === ">50K" ? (
                       <CheckCircle className="h-6 w-6 text-green-500" />
                     ) : (
                       <AlertCircle className="h-6 w-6 text-orange-500" />
@@ -587,26 +679,69 @@ export function CompleteAnalysisOrange() {
                   </AlertDialogTitle>
                   <AlertDialogDescription asChild>
                     <div className="text-lg">
-                      {prediction ? (
+                      {predictionResult ? (
                         <div className="space-y-3">
                           <div className="text-center">
                             <div
                               className={`text-2xl font-bold p-4 rounded-lg ${
-                                prediction === ">50K"
+                                predictionResult.prediction === ">50K"
                                   ? "bg-green-100 text-green-800 border border-green-200"
                                   : "bg-orange-100 text-orange-800 border border-orange-200"
                               }`}
                             >
-                              Predicted income: {prediction}
+                              Predicted income: {predictionResult.prediction}
                             </div>
                           </div>
                           <p className="text-orange-700">
                             The model predicts that this person will have an income{" "}
                             <strong>
-                              {prediction === ">50K" ? "greater than $50,000" : "less than or equal to $50,000"}
+                              {predictionResult.prediction === ">50K" ? "greater than $50,000" : "less than or equal to $50,000"}
                             </strong>{" "}
                             per year.
                           </p>
+                          
+                          {/* Probabilités justificatives */}
+                          <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                            <h4 className="font-semibold text-gray-800 mb-3 flex items-center">
+                              <BarChart3 className="h-4 w-4 mr-2" />
+                              Detailed probabilities
+                            </h4>
+                            <div className="space-y-3">
+                              <div className="flex justify-between items-center">
+                                <span className="text-sm text-gray-600">Income ≤ $50K :</span>
+                                <div className="flex items-center space-x-2">
+                                  <div className="w-24 bg-gray-200 rounded-full h-2">
+                                    <div 
+                                      className="bg-orange-500 h-2 rounded-full" 
+                                      style={{ width: `${(predictionResult.probabilities["0"] * 100)}%` }}
+                                    ></div>
+                                  </div>
+                                  <span className="text-sm font-medium text-gray-800">
+                                    {(predictionResult.probabilities["0"] * 100).toFixed(1)}%
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="flex justify-between items-center">
+                                <span className="text-sm text-gray-600">Income &gt; $50K :</span>
+                                <div className="flex items-center space-x-2">
+                                  <div className="w-24 bg-gray-200 rounded-full h-2">
+                                    <div 
+                                      className="bg-green-500 h-2 rounded-full" 
+                                      style={{ width: `${(predictionResult.probabilities["1"] * 100)}%` }}
+                                    ></div>
+                                  </div>
+                                  <span className="text-sm font-medium text-gray-800">
+                                    {(predictionResult.probabilities["1"] * 100).toFixed(1)}%
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="mt-3 pt-3 border-t border-gray-200">
+                              <p className="text-xs text-gray-500">
+                                Prediction confidence: <strong>{(predictionResult.probability * 100).toFixed(1)}%</strong>
+                              </p>
+                            </div>
+                          </div>
                         </div>
                       ) : (
                         <div className="text-center text-orange-600">No prediction available.</div>

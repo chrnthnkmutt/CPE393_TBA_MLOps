@@ -25,6 +25,11 @@ import seaborn as sns
 import pickle
 import sys
 
+from sklearn.metrics import classification_report
+
+
+
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from ml_pipeline.utils import add_custom_features, add_interactions
@@ -202,6 +207,12 @@ with mlflow.start_run(run_name="LightGBM_with_advanced_features"):
         # transformer les importances en pourcentage
         imp_df["percentage"] = 100 * imp_df["importance"] / imp_df["importance"].sum()
         
+        # Sauvegarder les importances en pourcentage en JSON
+        imp_json = imp_df[["feature", "percentage"]].to_dict(orient="records")
+        with open("models/feature_importances_percentage.json", "w") as f:
+            json.dump(imp_json, f, indent=2)
+        mlflow.log_artifact("models/feature_importances_percentage.json")
+        
         topn = 20  # top 20 features
         plt.figure(figsize=(10,6))
         plt.barh(imp_df["feature"][:topn], imp_df["percentage"][:topn])
@@ -272,8 +283,10 @@ with mlflow.start_run(run_name="LightGBM_with_advanced_features"):
     mlflow.log_metric("final_auc", auc)
     mlflow.log_metric("f1_score_best_thresh", f1)
 
-    
+    # ─── 9. Metrics ─────────────────────────────────────────────────────
+    print(classification_report(y_test, y_test_pred))
     print(f"FinalMetrics: Accuracy: {acc}, Precision: {prec}, Recall: {rec}, F1: {f1}, AUC: {auc}")
+    
     
     conf_matrix = confusion_matrix(y_test, y_test_pred)
     plt.figure(figsize=(8,5))
