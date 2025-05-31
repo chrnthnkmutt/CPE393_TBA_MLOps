@@ -4,18 +4,14 @@ services:
     container_name: frontend
     build:
       context: ./frontend
-      # dockerfile: Dockerfile.prod
-      dockerfile: Dockerfile.dev
-
+      dockerfile: Dockerfile.prod
+      
     environment:
       NODE_ENV: development
       ENV_VARIABLE: ${ENV_VARIABLE}
       NEXT_PUBLIC_ENV_VARIABLE: ${NEXT_PUBLIC_ENV_VARIABLE}
     env_file:
       - .env
-    volumes:
-      - ./frontend/:/app/
-      - ./frontend/public:/public
     restart: always
     ports:
       - 3000:3000
@@ -25,7 +21,7 @@ services:
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.prod
     ports:
       - "5000:5000"
     volumes:

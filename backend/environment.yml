@@ -22,6 +22,7 @@ dependencies:
   - pytest
   - lightgbm
   - category_encoders
+  - gunicorn
   - pip:
       - keras
       - tensorflow

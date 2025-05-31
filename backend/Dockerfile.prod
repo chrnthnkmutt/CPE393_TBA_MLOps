@@ -1,0 +1,14 @@
+FROM continuumio/miniconda3
+
+WORKDIR /app
+
+COPY environment.yml .
+RUN conda env create -f environment.yml && conda clean -a
+
+COPY app.py features.json modelCard.json .
+COPY production_models/* .
+COPY ml_pipeline ./ml_pipeline
+
+EXPOSE 5000
+
+CMD ["conda", "run", "--no-capture-output", "-n", "mlops-project", "gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "app:app"]
