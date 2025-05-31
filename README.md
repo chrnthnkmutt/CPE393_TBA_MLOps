@@ -62,7 +62,7 @@ and click at localhost:3000.
 
 ### 🔖 **1. Model Details**
 
-- **Model Name**: RF
+- **Model Name**: XGBoost
 - **Version**: Version 1
 - **Developers**: TBA_MLOPs Group
 - **Framework**: Scikit-learn
@@ -80,10 +80,11 @@ and click at localhost:3000.
 
 ### 📊 **3. Model Architecture**
 
-- **Type**: Logistic Regression
+- **Type**: XGBoost
 - **Description**: 
-	- Linear model that uses a logistic function to predict the probability of a binary outcome.
-	- Employs a sigmoid function to map any real-valued number into a value between 0 and 1, representing the probability of belonging to a certain class.
+	- An ensemble learning method based on gradient boosting of decision trees.
+	- Utilizes multiple weak learners (decision trees) combined sequentially, where each new tree corrects errors made by previous ones.
+	- Known for its high performance, scalability, and ability to handle both numerical and categorical features efficiently.
 	- In this case, the classes are income levels: ">50K" or "<=50K".
 - **Input/Output**:
 	- Input format: Numerical and categorical features (after preprocessing, including one-hot encoding for categorical variables). These features represent demographic and employment-related attributes like age, education, occupation, etc.
@@ -113,11 +114,32 @@ and click at localhost:3000.
 ### 📈 **5. Evaluation Metrics**
 
 - **Metrics**: 
-	- Accuracy: 0.8417
-	- Precision: 0.8699
-	- Recall: 0.9395
-	- F1 score: 0.9034
-	- AUC: 0.7095
+
+```
+	XGBoost:
+--------------------------------------------------
+  Train Accuracy:     0.8955
+  Test Accuracy:      0.8690
+  Overfitting:        0.0265
+  Precision:          0.8640
+  Recall:             0.8690
+  F1-Score:           0.8639
+  Confusion Matrix:
+    True Neg (<=50K):  989
+    False Pos:         579
+    False Neg:         274
+    True Pos (>50K):   4671
+  Classification Report:
+              precision    recall  f1-score   support
+
+       <=50K     0.7831    0.6307    0.6987      1568
+        >50K     0.8897    0.9446    0.9163      4945
+
+    accuracy                         0.8690      6513
+   macro avg     0.8364    0.7877    0.8075      6513
+weighted avg     0.8640    0.8690    0.8639      6513
+```
+
 - **Test Dataset**: 
 	- Splitting the dataset into training, validation, and testing sets to ensure robust evaluation.
 	- The evaluation process involves using Stratified K-Fold cross-validation to maintain class distribution across the folds.
