@@ -3,18 +3,15 @@ FROM continuumio/miniconda3
 WORKDIR /app
 
 COPY environment.yml .
-COPY app.py .
-COPY production_models/* .
-COPY features.json .
-
 RUN conda env create -f environment.yml && conda clean -a
 
-RUN echo "conda activate mlops-project" >> ~/.bashrc
-SHELL ["/bin/bash", "-c"]
+COPY app.py features.json modelCard.json .
+COPY production_models/* .
+COPY ml_pipeline ./ml_pipeline
 
 EXPOSE 5000
 
-CMD ["bash", "-c", "conda activate mlops-project && python app.py"]
+CMD ["conda", "run", "--no-capture-output", "-n", "mlops-project", "python", "app.py"]
 
 
 

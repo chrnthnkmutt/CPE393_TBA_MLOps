@@ -23,17 +23,22 @@ import category_encoders as ce
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pickle
+import sys
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from ml_pipeline.utils import add_custom_features, add_interactions
 
 
 # ─── 1. MLflow setup ──────────────────────────────────────────────────────────
-load_dotenv(os.path.join(os.path.dirname(__file__), "../.env"))
+load_dotenv(os.path.join(os.path.dirname(__file__), "..", "..", ".env"))
 mlflow.set_tracking_uri(os.getenv("MLFLOW_TRACKING_URI") or "sqlite:///mlflow.db")
 mlflow.set_experiment("Adult_LightGBM_Pipeline")
 
 # ─── 2. Chargement et nettoyage de base ──────────────────────────────────────
-raw = pd.read_csv("data/adult.csv")
+
+DATA_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "data", "adult.csv")
+raw = pd.read_csv(DATA_PATH)
 raw = raw.drop(columns=["fnlwgt"])
 
 
@@ -45,33 +50,6 @@ for col in ["workclass", "occupation", "native.country"]:
 raw["income"] = raw["income"].str.strip()
 raw["target"] = raw["income"].apply(lambda x: 1 if ">50K" in x else 0)
 
-
-# # ─── 3. Fonction d’ingénierie avancée ────────────────────────────────────────
-# def add_custom_features(df: pd.DataFrame) -> pd.DataFrame:
-#     df = df.copy()
-#     # flags
-#     df["has_cap_gain"] = (df["capital.gain"] > 0).astype(int)
-#     df["has_cap_loss"] = (df["capital.loss"] > 0).astype(int)
-#     # ratios
-#     df["gain_loss_ratio"] = (df["capital.gain"] + 1) / (df["capital.loss"] + 1)
-#     df["work_rate"] = df["hours.per.week"] / (df["age"] + 1)
-#     # binning âge
-#     df["age_bin"] = pd.cut(
-#         df["age"],
-#         bins=[0, 30, 50, 100],
-#         labels=["young", "mid", "senior"]
-#     ).astype(str)
-#     return df
-
-
-# ─── 4. Pipeline de features ─────────────────────────────────────────────────
-
-# def add_interactions(X):
-#     return np.hstack([
-#         X,
-#         (X[:, [0]] * X[:, [1]]),           # age * hours.per.week
-#         (X[:, [2]] / (X[:, [3]] + 1)),     # educ.num / (cap.gain +1)
-#     ])
 
 
 def build_feature_pipeline():
@@ -184,7 +162,7 @@ with mlflow.start_run(run_name="LightGBM_with_advanced_features"):
     
     # ─── Save model manually as pickle ────────────────────────────────────────
 
-    PATH_MODEL = os.path.join(os.path.dirname(__file__), "..", "models", "lightgbm_pipeline.pkl")
+    PATH_MODEL = os.path.join(os.path.dirname(__file__), "..", "..", "models", "lightgbm_pipeline.pkl")
     os.makedirs(os.path.dirname(PATH_MODEL), exist_ok=True)
     with open(PATH_MODEL, "wb") as f:
         pickle.dump(pipeline, f)

@@ -5,6 +5,12 @@ import pandas as pd
 import json
 import os
 import logging
+import sys
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from ml_pipeline.utils import add_custom_features, add_interactions
+
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -29,7 +35,7 @@ with open(MODEL_PATH, 'rb') as f:
 
 with open(FEATURES_PATH) as f:
     feature_info = json.load(f)
-    feature_names = [f["name"] for f in feature_info]
+    feature_names = [f["name"] for f in feature_info["features"]]
     
 
 
@@ -102,132 +108,60 @@ def get_features():
         
         
 
-# Mapping front → back 
-value_map = {
-    # éducation
-    "education_assoc_acdm":  "education_Assoc-acdm",
-    "education_assoc_voc":   "education_Assoc-voc",
-    "education_bachelors":   "education_Bachelors",
-    "education_doctorate":   "education_Doctorate",
-    "education_hs_grad":     "education_HS-grad",
-    "education_masters":     "education_Masters",
-    "education_prof_school": "education_Prof-school",
-    # marital.status
-    "marital_status_married":       "marital.status_Married",
-    "marital_status_never_married": "marital.status_Never-married",
-    "marital_status_separated":     "marital.status_Separated",
-    "marital_status_widowed":       "marital.status_Widowed",
-    # occupation
-    "occupation_adm_clerical":      "occupation_Adm-clerical",
-    "occupation_armed_forces":      "occupation_Armed-Forces",
-    "occupation_craft_repair":      "occupation_Craft-repair",
-    "occupation_exec_managerial":   "occupation_Exec-managerial",
-    "occupation_farming_fishing":   "occupation_Farming-fishing",
-    "occupation_handlers_cleaners": "occupation_Handlers-cleaners",
-    "occupation_machine_op_inspct": "occupation_Machine-op-inspct",
-    "occupation_priv_house_serv":   "occupation_Priv-house-serv",
-    "occupation_prof_specialty":    "occupation_Prof-specialty",
-    "occupation_protective_serv":   "occupation_Protective-serv",
-    "occupation_sales":             "occupation_Sales",
-    "occupation_tech_support":      "occupation_Tech-support",
-    "occupation_transport_moving":  "occupation_Transport-moving",
-    # race
-    "race_amer_indian_eskimo":      "race_Amer-Indian-Eskimo",
-    "race_asian_pac_islander":      "race_Asian-Pac-Islander",
-    "race_other":                   "race_Other",
-    "race_white":                   "race_White",
-    # relationship
-    "relationship_husband":         "relationship_Husband",
-    "relationship_not_in_family":   "relationship_Not-in-family",
-    "relationship_other_relative":  "relationship_Other-relative",
-    "relationship_own_child":       "relationship_Own-child",
-    "relationship_unmarried":       "relationship_Unmarried",
-    "relationship_wife":            "relationship_Wife",
-    # workclass
-    "workclass_govt_employees":     "workclass_Govt_employees",
-    "workclass_never_worked":       "workclass_Never-worked",
-    "workclass_private":            "workclass_Private",
-    "workclass_self_employed":      "workclass_Self_employed",
-    "workclass_without_pay":        "workclass_Without-pay",
-    # sex
-    "sex_female":                   "sex_Female",
-    # NOTE: sex_male → toutes les colonnes `sex_…` restent à 0
+education_map = {
+    "Preschool": 1,
+    "1st-4th": 2,
+    "5th-6th": 3,
+    "7th-8th": 4,
+    "9th": 5,
+    "10th": 6,
+    "11th": 7,
+    "12th": 8,
+    "HS-grad": 9,
+    "Some-college": 10,
+    "Assoc-voc": 11,
+    "Assoc-acdm": 12,
+    "Bachelors": 13,
+    "Masters": 14,
+    "Prof-school": 15,
+    "Doctorate": 16
 }
 
-def transform_payload_to_vector(data: dict) -> dict:
-
-    vec = {feat: 0 for feat in feature_names}
-
-    vec["age"]             = float(data.get("age", 0))
-    vec["capital.gain"]    = float(data.get("capital_gain", 0))
-    vec["capital.loss"]    = float(data.get("capital_loss", 0))
-    vec["hours.per.week"]  = float(data.get("hours_per_week", 0))
-
-    for field in ("education_level", "marital_status", "occupation",
-                  "race", "relationship", "workclass", "sex"):
-        val = data.get(field)
-        if val:
-            mapped = value_map.get(val)
-            if mapped and mapped in vec:
-                vec[mapped] = 1
-
-    return vec
-
-
 @app.route("/api/predict", methods=["POST"])
 def predict():
     logger.info("Prediction request received")
-    data = request.get_json()
+    try:
+        data = request.get_json()
 
-    input_vector = transform_payload_to_vector(data)
-    df = pd.DataFrame([input_vector])
+        # Vérifie que 'education' est présente
+        if "education" not in data:
+            return jsonify({"error": "Missing 'education' field"}), 400
 
-    y_proba = model.predict_proba(df)[0][1] 
-    threshold = 0.60 
-    prediction = 1 if y_proba > threshold else 0
+        # Ajoute automatiquement education.num
+        if data["education"] not in education_map:
+            return jsonify({"error": f"Unknown education level: {data['education']}"}), 400
+        data["education.num"] = education_map[data["education"]]
 
-    label = ">50K" if prediction else "<=50K"
-    logger.info(f"Prediction completed: {label} (Proba: {y_proba:.4f})")
-    return jsonify({"prediction": label, "probability": round(y_proba, 4)})
+        # Construction DataFrame + features custom
+        df = pd.DataFrame([data])
+        df = add_custom_features(df)
 
+        # Prédiction
+        proba = model.predict_proba(df)[0]
+        y_proba = proba[1]
+        prediction = int(y_proba > 0.60)
+        label = ">50K" if prediction else "<=50K"
 
-
-@app.route("/api/predict_proba", methods=["POST"])
-def predict_proba():
-    logger.info("Probability prediction request received")
-    data = request.get_json()
-  
-    input_vector = transform_payload_to_vector(data)
-    df = pd.DataFrame([input_vector])
-    proba = model.predict_proba(df)[0]
-
-    logger.info("Probability prediction completed successfully")
-    return jsonify({
-        "probabilities": dict(zip(model.classes_.astype(str), proba.tolist()))
-    })
+        logger.info(f"Prediction completed: {label} (proba: {y_proba:.4f})")
+        return jsonify({
+            "prediction": label,
+            "probability": round(y_proba, 4),
+            "probabilities": dict(zip(model.classes_.astype(str), proba.tolist()))
+        })
     
-    
-
-@app.route("/api/predict", methods=["POST"])
-def predict():
-    logger.info("Prediction request received")
-    data = request.get_json()
-
-    input_vector = {name: data.get(name, 0) for name in feature_names}
-    df = pd.DataFrame([input_vector])
-
-    proba = model.predict_proba(df)[0]
-    y_proba = proba[1]
-    prediction = int(y_proba > 0.60)
-    label = ">50K" if prediction else "<=50K"
-
-    logger.info(f"Prediction completed: {label} (proba: {y_proba:.4f})")
-    return jsonify({
-        "prediction": label,
-        "probability": round(y_proba, 4),
-        "probabilities": dict(zip(model.classes_.astype(str), proba.tolist()))
-    })
-
+    except Exception as e:
+        logger.exception("Prediction failed")
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route("/api/model_info", methods=["GET"])

@@ -1,178 +1,46 @@
-[
-  {
-    "name": "education_Assoc-acdm",
-    "type": "binary"
-  },
-  {
-    "name": "education_Assoc-voc",
-    "type": "binary"
-  },
-  {
-    "name": "education_Bachelors",
-    "type": "binary"
-  },
-  {
-    "name": "education_Doctorate",
-    "type": "binary"
-  },
-  {
-    "name": "education_HS-grad",
-    "type": "binary"
-  },
-  {
-    "name": "education_Masters",
-    "type": "binary"
-  },
-  {
-    "name": "education_Prof-school",
-    "type": "binary"
-  },
-  {
-    "name": "marital.status_Married",
-    "type": "binary"
-  },
-  {
-    "name": "marital.status_Never-married",
-    "type": "binary"
-  },
-  {
-    "name": "marital.status_Separated",
-    "type": "binary"
-  },
-  {
-    "name": "marital.status_Widowed",
-    "type": "binary"
-  },
-  {
-    "name": "occupation_Adm-clerical",
-    "type": "binary"
-  },
-  {
-    "name": "occupation_Armed-Forces",
-    "type": "binary"
-  },
-  {
-    "name": "occupation_Craft-repair",
-    "type": "binary"
-  },
-  {
-    "name": "occupation_Exec-managerial",
-    "type": "binary"
-  },
-  {
-    "name": "occupation_Farming-fishing",
-    "type": "binary"
-  },
-  {
-    "name": "occupation_Handlers-cleaners",
-    "type": "binary"
-  },
-  {
-    "name": "occupation_Machine-op-inspct",
-    "type": "binary"
-  },
-  {
-    "name": "occupation_Priv-house-serv",
-    "type": "binary"
-  },
-  {
-    "name": "occupation_Prof-specialty",
-    "type": "binary"
-  },
-  {
-    "name": "occupation_Protective-serv",
-    "type": "binary"
-  },
-  {
-    "name": "occupation_Sales",
-    "type": "binary"
-  },
-  {
-    "name": "occupation_Tech-support",
-    "type": "binary"
-  },
-  {
-    "name": "occupation_Transport-moving",
-    "type": "binary"
-  },
-  {
-    "name": "race_Amer-Indian-Eskimo",
-    "type": "binary"
-  },
-  {
-    "name": "race_Asian-Pac-Islander",
-    "type": "binary"
-  },
-  {
-    "name": "race_Other",
-    "type": "binary"
-  },
-  {
-    "name": "race_White",
-    "type": "binary"
-  },
-  {
-    "name": "relationship_Husband",
-    "type": "binary"
-  },
-  {
-    "name": "relationship_Not-in-family",
-    "type": "binary"
-  },
-  {
-    "name": "relationship_Other-relative",
-    "type": "binary"
-  },
-  {
-    "name": "relationship_Own-child",
-    "type": "binary"
-  },
-  {
-    "name": "relationship_Unmarried",
-    "type": "binary"
-  },
-  {
-    "name": "relationship_Wife",
-    "type": "binary"
-  },
-  {
-    "name": "sex_Female",
-    "type": "binary"
-  },
-  {
-    "name": "workclass_Govt_employees",
-    "type": "binary"
-  },
-  {
-    "name": "workclass_Never-worked",
-    "type": "binary"
-  },
-  {
-    "name": "workclass_Private",
-    "type": "binary"
-  },
-  {
-    "name": "workclass_Self_employed",
-    "type": "binary"
-  },
-  {
-    "name": "workclass_Without-pay",
-    "type": "binary"
-  },
-  {
-    "name": "age",
-    "type": "numeric"
-  },
-  {
-    "name": "capital.gain",
-    "type": "numeric"
-  },
-  {
-    "name": "capital.loss",
-    "type": "numeric"
-  },
-  {
-    "name": "hours.per.week",
-    "type": "numeric"
+{
+    "status": "success",
+    "features": [
+      { "name": "age", "type": "numeric" },
+      { "name": "workclass", "type": "categorical", "values": [
+        "Federal-gov", "Local-gov", "Never-worked", "Private",
+        "Self-emp-inc", "Self-emp-not-inc", "State-gov", "Without-pay"
+      ] },
+      { "name": "education", "type": "categorical", "values": [
+        "Preschool", "1st-4th", "5th-6th", "7th-8th", "9th", "10th", "11th", "12th",
+        "HS-grad", "Some-college", "Assoc-voc", "Assoc-acdm",
+        "Bachelors", "Masters", "Prof-school", "Doctorate"
+      ] },
+      { "name": "marital.status", "type": "categorical", "values": [
+        "Divorced", "Married-AF-spouse", "Married-civ-spouse",
+        "Married-spouse-absent", "Never-married", "Separated", "Widowed"
+      ] },
+      { "name": "occupation", "type": "categorical", "values": [
+        "Adm-clerical", "Armed-Forces", "Craft-repair", "Exec-managerial",
+        "Farming-fishing", "Handlers-cleaners", "Machine-op-inspct", "Other-service",
+        "Priv-house-serv", "Prof-specialty", "Protective-serv", "Sales",
+        "Tech-support", "Transport-moving"
+      ] },
+      { "name": "relationship", "type": "categorical", "values": [
+        "Husband", "Not-in-family", "Other-relative", "Own-child", "Unmarried", "Wife"
+      ] },
+      { "name": "race", "type": "categorical", "values": [
+        "Amer-Indian-Eskimo", "Asian-Pac-Islander", "Black", "Other", "White"
+      ] },
+      { "name": "sex", "type": "categorical", "values": ["Female", "Male"] },
+      { "name": "capital.gain", "type": "numeric" },
+      { "name": "capital.loss", "type": "numeric" },
+      { "name": "hours.per.week", "type": "numeric" },
+      { "name": "native.country", "type": "categorical", "values": [
+        "Cambodia", "Canada", "China", "Columbia", "Cuba", "Dominican-Republic",
+        "Ecuador", "El-Salvador", "England", "France", "Germany", "Greece",
+        "Guatemala", "Haiti", "Holand-Netherlands", "Honduras", "Hong", "Hungary",
+        "India", "Iran", "Ireland", "Italy", "Jamaica", "Japan", "Laos", "Mexico",
+        "Nicaragua", "Outlying-US(Guam-USVI-etc)", "Peru", "Philippines", "Poland",
+        "Portugal", "Puerto-Rico", "Scotland", "South", "Taiwan", "Thailand",
+        "Trinadad&Tobago", "United-States", "Vietnam", "Yugoslavia"
+      ] }
+    ],
+    "count": 12
   }
-]
+  

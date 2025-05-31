@@ -13,7 +13,7 @@ services:
   frontend:
     container_name: frontend
     build:
-      context: ./front-app
+      context: ./frontend
       dockerfile: Dockerfile.dev
     # Set environment variables directly in the compose file
     environment:
@@ -24,8 +24,8 @@ services:
     env_file:
       - .env
     volumes:
-      - ./front-app/:/app/
-      - ./front-app/public:/public
+      - ./frontend/:/app/
+      - ./frontend/public:/public
     restart: always
     ports:
       - 3000:3000
@@ -41,12 +41,12 @@ services:
 
   backend:
     build:
-      context: ./back-app
+      context: ./backend
       dockerfile: Dockerfile
     ports:
       - "5000:5000"
     volumes:
-      - ./back-app:/app
+      - ./backend:/app
     environment:
       - FLASK_ENV=development
       - FLASK_APP=app.py

@@ -21,6 +21,7 @@ dependencies:
   - flask-cors
   - pytest
   - lightgbm
+  - category_encoders
   - pip:
       - keras
       - tensorflow
