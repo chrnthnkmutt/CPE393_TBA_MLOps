@@ -17,6 +17,10 @@ dependencies:
   - pydotplus
   - xgboost
   - pip
+  - flask
+  - flask-cors
+  - pytest
+  - lightgbm
   - pip:
       - keras
       - tensorflow

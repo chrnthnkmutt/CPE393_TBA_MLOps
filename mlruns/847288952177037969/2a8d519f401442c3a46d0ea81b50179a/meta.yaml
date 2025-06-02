@@ -1,0 +1,15 @@
+artifact_uri: file:///home/talleyrand/Documents/MLOps/CPE393_TBA_MLOps/mlruns/847288952177037969/2a8d519f401442c3a46d0ea81b50179a/artifacts
+end_time: 1748560443389
+entry_point_name: ''
+experiment_id: '847288952177037969'
+lifecycle_stage: active
+run_id: 2a8d519f401442c3a46d0ea81b50179a
+run_name: RF
+run_uuid: 2a8d519f401442c3a46d0ea81b50179a
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1748560441422
+status: 3
+tags: []
+user_id: talleyrand

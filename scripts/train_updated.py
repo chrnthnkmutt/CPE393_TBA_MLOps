@@ -18,6 +18,10 @@ from sklearn.pipeline import Pipeline
 from sklearn.base import TransformerMixin
 from sklearn.preprocessing import MinMaxScaler,StandardScaler
 from dotenv import load_dotenv
+import matplotlib.pyplot as plt
+from lightgbm import LGBMClassifier
+
+
 
 load_dotenv(os.path.join(os.path.dirname(__file__), "../.env"))
 
@@ -31,6 +35,8 @@ mlflow.set_experiment("MyExperiment")
 warnings.filterwarnings("ignore", category=RuntimeWarning, message="divide by zero encountered in matmul")
 warnings.filterwarnings("ignore", category=RuntimeWarning, message="overflow encountered in matmul")
 warnings.filterwarnings("ignore", category=RuntimeWarning, message="invalid value encountered in matmul")
+
+
 
 def feature_engineer():
 
@@ -107,6 +113,16 @@ def feature_engineer():
 
     # Fix: Copy data to avoid warning and use more modern replacement approach
     data = data.copy()
+    
+    data["income"] = data["income"].str.strip()
+
+    data["target"] = data["income"].apply(lambda x: 1 if ">" in x and "50K" in x else 0)
+
+    print("\n--------------------------------------------")
+    print(data["target"].value_counts())
+    print(data["income"].value_counts())
+
+
     data['education'] = data['education'].replace(hs_grad, 'HS-grad')
     data['education'] = data['education'].replace(elementary, 'elementary_school')
     print("\n--------------------------------------------")
@@ -144,7 +160,7 @@ def feature_engineer():
     # Numeric columns
     num_col_new = ['age','capital.gain', 'capital.loss', 'hours.per.week','fnlwgt']
     # Categorical columns
-    cat_col_new = ['workclass', 'education', 'marital.status', 'occupation', 'relationship', 'race', 'sex', 'income']
+    cat_col_new = ['workclass', 'education', 'marital.status', 'occupation', 'relationship', 'race', 'sex']
 
     scaler = MinMaxScaler()
     print("\n--------------------------------------------")
@@ -182,7 +198,7 @@ def feature_engineer():
     # columns which we don't need after creating dummy variables dataframe
     cols = ['workclass_Govt_employess','education_Some-college',
         'marital-status_Never-married','occupation_Other-service',
-        'race_Black','sex_Male','income_>50K']
+        'race_Black','sex_Male']
     
     class dummies(TransformerMixin):
         def __init__(self,cols):
@@ -205,25 +221,32 @@ def feature_engineer():
 
     cat_df['id'] = pd.Series(range(cat_df.shape[0]))
     num_df['id'] = pd.Series(range(num_df.shape[0]))
+    
+    cat_df["target"] = data["target"].values
+
 
     final_df = pd.merge(cat_df,num_df,how = 'inner', on = 'id')
     print("\n--------------------------------------------")
     print(f"Number of observations in final dataset: {final_df.shape}")
 
-    # split the dataset
-    y = final_df['income_<=50K']
-    X = final_df.drop(columns=['id','income_<=50K','fnlwgt'])  # Fix: Use drop with columns parameter
+    y = final_df['target']
+    X = final_df.drop(columns=['id','target','fnlwgt'])
 
     return X, y
     
 def Model_Training():
     X, y = feature_engineer()
+    
+    print("\n--------------------------------------------")
+    print("the value is: ", y.value_counts(normalize=True))  
+    print("\n--------------------------------------------")
+
     # Split the dataset into training and testing sets
     X_train1, X_test1, y_train1, y_test1 = train_test_split(X, y, test_size=0.15, random_state=42)
     
     # Fitting the model
     # Fix: Use more stable solver and add regularization to prevent numerical issues
-    lr = LogisticRegression(solver='liblinear', C=1.0)
+    lr = LogisticRegression(solver='liblinear', C=1.0, class_weight='balanced')
     lr.fit(X_train1, y_train1)
     
     # Predict 
@@ -242,9 +265,11 @@ def Model_Training():
 def GetBasedModel():
     basedModels = []
     # Fix: Use more stable solver and add regularization to prevent numerical issues
-    basedModels.append(('LR', LogisticRegression(solver='liblinear', C=1.0)))
+    basedModels.append(('LR', LogisticRegression(solver='liblinear', C=1.0, class_weight='balanced')))
     basedModels.append(('GBM', GradientBoostingClassifier()))
-    basedModels.append(('RF', RandomForestClassifier(n_estimators=100, random_state=42))) # Fix: Add random_forest 
+    basedModels.append(('RF', RandomForestClassifier(n_estimators=100, random_state=42, class_weight='balanced'))) 
+    basedModels.append(('LightGBM', LGBMClassifier(class_weight='balanced', random_state=42)))
+
     return basedModels
 
 def BasedLine2(X_train, y_train, models):
@@ -348,7 +373,7 @@ if __name__ == "__main__":
     # Train all models (LR, GBM, and RF)
     model_dict = {}
     for name, model in models:
-        if name in ['LR', 'GBM', 'RF']:
+        if name in ['LR', 'GBM', 'RF', 'LightGBM']:
             with mlflow.start_run(run_name=name):
                 print(f"\nTraining {name} model...")
                 model.fit(X_train, y_train)
@@ -379,16 +404,164 @@ if __name__ == "__main__":
                 mlflow.sklearn.log_model(model, name.lower() + "_model")
 
                 # Optionally log params
-                if name == "LR":
+                if name == 'LR':
                     mlflow.log_param("solver", model.solver)
                     mlflow.log_param("C", model.C)
+
+                    # ➕ Analyse du seuil de décision
+                    thresholds = np.arange(0.1, 0.9, 0.05)
+                    f1s, precisions, recalls = [], [], []
+                    y_proba = model.predict_proba(X_test)[:, 1]
+
+                    for t in thresholds:
+                        y_pred_thresh = (y_proba > t).astype(int)
+                        f1s.append(metrics.f1_score(y_test, y_pred_thresh))
+                        precisions.append(metrics.precision_score(y_test, y_pred_thresh))
+                        recalls.append(metrics.recall_score(y_test, y_pred_thresh))
+
+                    best_t_idx = np.argmax(f1s)
+                    best_threshold = thresholds[best_t_idx]
+                    best_f1 = f1s[best_t_idx]
+
+                    print(f"\n🔍 Threshold analysis (Logistic Regression)")
+                    print(f"Best threshold: {best_threshold:.2f} → F1: {best_f1:.4f} | Precision: {precisions[best_t_idx]:.4f} | Recall: {recalls[best_t_idx]:.4f}")
+
+                    # Log the best threshold manually (not a model param)
+                    mlflow.log_metric("best_threshold", best_threshold)
+                    
+                    plt.figure(figsize=(10, 6))
+                    plt.plot(thresholds, f1s, label='F1-score', marker='o')
+                    plt.plot(thresholds, precisions, label='Precision', marker='x')
+                    plt.plot(thresholds, recalls, label='Recall', marker='^')
+                    plt.axvline(x=best_threshold, color='gray', linestyle='--', label=f"Best threshold = {best_threshold:.2f}")
+                    plt.xlabel("Seuil de décision")
+                    plt.ylabel("Score")
+                    plt.title("Impact du seuil de décision sur les performances du modèle LR")
+                    plt.legend()
+                    plt.grid(True)
+                    plt.tight_layout()
+                    plt.savefig("models/LR_threshold_plot.png")  # 📁 Enregistrement pour ton dossier modèle
+                    # plt.show()
+
                 elif name == "GBM":
                     mlflow.log_param("n_estimators", model.n_estimators)
                     mlflow.log_param("learning_rate", model.learning_rate)
+
+                    # ➕ Analyse du seuil de décision pour GBM
+                    thresholds = np.arange(0.1, 0.9, 0.05)
+                    f1s, precisions, recalls = [], [], []
+                    y_proba = model.predict_proba(X_test)[:, list(model.classes_).index(1)]
+
+                    for t in thresholds:
+                        y_pred_thresh = (y_proba > t).astype(int)
+                        f1s.append(metrics.f1_score(y_test, y_pred_thresh))
+                        precisions.append(metrics.precision_score(y_test, y_pred_thresh))
+                        recalls.append(metrics.recall_score(y_test, y_pred_thresh))
+
+                    best_t_idx = np.argmax(f1s)
+                    best_threshold = thresholds[best_t_idx]
+                    best_f1 = f1s[best_t_idx]
+
+                    print(f"\n🔍 Threshold analysis (GBM)")
+                    print(f"Best threshold: {best_threshold:.2f} → F1: {best_f1:.4f} | Precision: {precisions[best_t_idx]:.4f} | Recall: {recalls[best_t_idx]:.4f}")
+
+                    # Log the best threshold manually
+                    mlflow.log_metric("best_threshold", best_threshold)
+                    
+                    plt.figure(figsize=(10, 6))
+                    plt.plot(thresholds, f1s, label='F1-score', marker='o')
+                    plt.plot(thresholds, precisions, label='Precision', marker='x')
+                    plt.plot(thresholds, recalls, label='Recall', marker='^')
+                    plt.axvline(x=best_threshold, color='gray', linestyle='--', label=f"Best threshold = {best_threshold:.2f}")
+                    plt.xlabel("Seuil de décision")
+                    plt.ylabel("Score")
+                    plt.title("Impact du seuil de décision sur les performances du modèle GBM")
+                    plt.legend()
+                    plt.grid(True)
+                    plt.tight_layout()
+                    plt.savefig("models/GBM_threshold_plot.png")
+
                 elif name == "RF":
                     mlflow.log_param("n_estimators", model.n_estimators)
                     mlflow.log_param("max_depth", model.max_depth)
-                
+
+                    # ➕ Analyse du seuil de décision pour RF
+                    thresholds = np.arange(0.1, 0.9, 0.05)
+                    f1s, precisions, recalls = [], [], []
+                    y_proba = model.predict_proba(X_test)[:, 1]
+
+                    for t in thresholds:
+                        y_pred_thresh = (y_proba > t).astype(int)
+                        f1s.append(metrics.f1_score(y_test, y_pred_thresh))
+                        precisions.append(metrics.precision_score(y_test, y_pred_thresh))
+                        recalls.append(metrics.recall_score(y_test, y_pred_thresh))
+
+                    best_t_idx = np.argmax(f1s)
+                    best_threshold = thresholds[best_t_idx]
+                    best_f1 = f1s[best_t_idx]
+
+                    print(f"\n🔍 Threshold analysis (Random Forest)")
+                    print(f"Best threshold: {best_threshold:.2f} → F1: {best_f1:.4f} | Precision: {precisions[best_t_idx]:.4f} | Recall: {recalls[best_t_idx]:.4f}")
+
+                    # Log the best threshold manually
+                    mlflow.log_metric("best_threshold", best_threshold)
+                    
+                    plt.figure(figsize=(10, 6))
+                    plt.plot(thresholds, f1s, label='F1-score', marker='o')
+                    plt.plot(thresholds, precisions, label='Precision', marker='x')
+                    plt.plot(thresholds, recalls, label='Recall', marker='^')
+                    plt.axvline(x=best_threshold, color='gray', linestyle='--', label=f"Best threshold = {best_threshold:.2f}")
+                    plt.xlabel("Seuil de décision")
+                    plt.ylabel("Score")
+                    plt.title("Impact du seuil de décision sur les performances du modèle Random Forest")
+                    plt.legend()
+                    plt.grid(True)
+                    plt.tight_layout()
+                    plt.savefig("models/RF_threshold_plot.png")
+                    
+                elif name == "LightGBM":
+                    mlflow.log_param("n_estimators", model.n_estimators)
+                    mlflow.log_param("learning_rate", model.learning_rate)
+                    mlflow.log_param("max_depth", model.max_depth)
+                    mlflow.log_param("num_leaves", model.num_leaves)
+                    mlflow.log_param("min_child_samples", model.min_child_samples)
+                    mlflow.log_param("subsample", model.subsample)
+
+                    # ➕ Analyse du seuil de décision pour LightGBM
+                    thresholds = np.arange(0.1, 0.9, 0.05)
+                    f1s, precisions, recalls = [], [], []
+                    y_proba = model.predict_proba(X_test)[:, 1]
+
+                    for t in thresholds:
+                        y_pred_thresh = (y_proba > t).astype(int)
+                        f1s.append(metrics.f1_score(y_test, y_pred_thresh))
+                        precisions.append(metrics.precision_score(y_test, y_pred_thresh))
+                        recalls.append(metrics.recall_score(y_test, y_pred_thresh))
+
+                    best_t_idx = np.argmax(f1s)
+                    best_threshold = thresholds[best_t_idx]
+                    best_f1 = f1s[best_t_idx]
+
+                    print(f"\n🔍 Threshold analysis (LightGBM)")
+                    print(f"Best threshold: {best_threshold:.2f} → F1: {best_f1:.4f} | Precision: {precisions[best_t_idx]:.4f} | Recall: {recalls[best_t_idx]:.4f}")
+
+                    # Log the best threshold manually
+                    mlflow.log_metric("best_threshold", best_threshold)
+                    
+                    plt.figure(figsize=(10, 6))
+                    plt.plot(thresholds, f1s, label='F1-score', marker='o')
+                    plt.plot(thresholds, precisions, label='Precision', marker='x')
+                    plt.plot(thresholds, recalls, label='Recall', marker='^')
+                    plt.axvline(x=best_threshold, color='gray', linestyle='--', label=f"Best threshold = {best_threshold:.2f}")
+                    plt.xlabel("Seuil de décision")
+                    plt.ylabel("Score")
+                    plt.title("Impact du seuil de décision sur les performances du modèle LightGBM")
+                    plt.legend()
+                    plt.grid(True)
+                    plt.tight_layout()
+                    plt.savefig("models/LightGBM_threshold_plot.png")
+                    # plt.show()
+                    
                 # Save metrics to JSON for all models (not the best way to save metrics, but mlflow & website are not hosted on the same server - more simple for a class presentation)
                 metrics_dict = {
                     'accuracy': acc,

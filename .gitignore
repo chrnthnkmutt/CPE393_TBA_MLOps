@@ -1,5 +1,6 @@
 *.pkl
-!back-app/production_models/*
+!backend/production_models/*
+lightgbm_pipeline.pkl
 
 .ipynb_checkpoints/
 

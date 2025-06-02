@@ -1,0 +1,45 @@
+services:
+
+  frontend:
+    container_name: frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+      
+    environment:
+      NODE_ENV: development
+      ENV_VARIABLE: ${ENV_VARIABLE}
+      NEXT_PUBLIC_ENV_VARIABLE: ${NEXT_PUBLIC_ENV_VARIABLE}
+    env_file:
+      - .env
+    restart: always
+    ports:
+      - 3000:3000
+    networks:
+      - app-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend:/app
+    environment:
+      - FLASK_ENV=development
+      - FLASK_APP=app.py
+    networks:
+      - app-network
+
+    #   nginx:
+#     image: nginx:latest
+#     ports:
+#       - 80:80
+#     networks:
+#       - network
+#     restart: always
+
+networks:
+  app-network:
+    driver: bridge
