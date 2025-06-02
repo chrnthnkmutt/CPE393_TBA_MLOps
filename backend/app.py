@@ -91,11 +91,11 @@ def get_features():
             logger.error("No features information available")
             return jsonify({"status": "error", "message": "No features information available"}), 500
             
-        logger.info(f"Successfully retrieved {len(feature_info)} features")
+        logger.info(f"Successfully retrieved {len(feature_info['features'])} features")
         return jsonify({
             "status": "success",
             "features": feature_info,
-            "count": len(feature_info)
+            "count": len(feature_info['features'])
         })
         
     except Exception as e:
