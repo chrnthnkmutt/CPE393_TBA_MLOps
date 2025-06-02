@@ -163,7 +163,7 @@ def predict():
         
         data = {column_map.get(k, k): v for k, v in data.items()}
 
-        print(data)
+        logger.debug(data)
 
         # Construction DataFrame + features custom
         df = pd.DataFrame([data])
